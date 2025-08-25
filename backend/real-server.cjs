@@ -6,7 +6,7 @@ const http = require('http');
 const url = require('url');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 class RealAPIServer {
     constructor(port = 8788) {
@@ -160,6 +160,14 @@ class RealAPIServer {
                 await this.handleGalleryExport(req, res);
             } else if (pathname.startsWith('/api/upload')) {
                 await this.handleUpload(req, res);
+            } else if (pathname === '/api/upload-image') {
+                await this.handleImageUpload(req, res);
+            } else if (pathname === '/api/batch-ocr') {
+                await this.handleBatchOCR(req, res);
+            } else if (pathname === '/api/github/save-note') {
+                await this.handleSaveNote(req, res);
+            } else if (pathname === '/api/sync/local') {
+                await this.handleLocalSync(req, res);
             } else {
                 // 404处理
                 res.writeHead(404, { 'Content-Type': 'application/json' });
@@ -703,6 +711,413 @@ class RealAPIServer {
                 serverType: 'real-api'
             };
         }
+    }
+
+    /**
+     * 处理单个图片上传到Cloudflare Images
+     */
+    async handleImageUpload(req, res) {
+        if (req.method !== 'POST') {
+            res.writeHead(405, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Method not allowed' }));
+            return;
+        }
+
+        try {
+            const chunks = [];
+            let boundary = null;
+            
+            // 解析multipart/form-data
+            const contentType = req.headers['content-type'];
+            if (contentType && contentType.includes('multipart/form-data')) {
+                boundary = contentType.split('boundary=')[1];
+            }
+            
+            req.on('data', chunk => chunks.push(chunk));
+            req.on('end', async () => {
+                try {
+                    const buffer = Buffer.concat(chunks);
+                    const { imageBuffer, filename } = this.parseMultipartData(buffer, boundary);
+                    
+                    if (!imageBuffer || !filename) {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'No image file found' }));
+                        return;
+                    }
+                    
+                    const result = await this.uploadToCloudflareImages(imageBuffer, filename);
+                    
+                    if (result.success) {
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({
+                            success: true,
+                            id: result.id,
+                            url: result.url,
+                            filename: result.filename
+                        }));
+                    } else {
+                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: result.error }));
+                    }
+                } catch (error) {
+                    console.error('Image upload processing error:', error);
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Upload processing failed' }));
+                }
+            });
+        } catch (error) {
+            console.error('Image upload error:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Upload failed' }));
+        }
+    }
+
+    /**
+     * 解析multipart/form-data
+     */
+    parseMultipartData(buffer, boundary) {
+        if (!boundary) {
+            return { imageBuffer: null, filename: null };
+        }
+        
+        const boundaryBuffer = Buffer.from(`--${boundary}`);
+        const parts = [];
+        let start = 0;
+        
+        while (true) {
+            const boundaryIndex = buffer.indexOf(boundaryBuffer, start);
+            if (boundaryIndex === -1) break;
+            
+            const nextBoundaryIndex = buffer.indexOf(boundaryBuffer, boundaryIndex + boundaryBuffer.length);
+            if (nextBoundaryIndex === -1) break;
+            
+            const part = buffer.slice(boundaryIndex + boundaryBuffer.length, nextBoundaryIndex);
+            parts.push(part);
+            start = nextBoundaryIndex;
+        }
+        
+        for (const part of parts) {
+            const headerEndIndex = part.indexOf('\r\n\r\n');
+            if (headerEndIndex === -1) continue;
+            
+            const headers = part.slice(0, headerEndIndex).toString();
+            const content = part.slice(headerEndIndex + 4);
+            
+            if (headers.includes('Content-Disposition: form-data') && headers.includes('name="image"')) {
+                const filenameMatch = headers.match(/filename="([^"]+)"/);
+                const filename = filenameMatch ? filenameMatch[1] : 'uploaded-image.jpg';
+                
+                // 移除末尾的\r\n
+                const imageBuffer = content.slice(0, content.length - 2);
+                return { imageBuffer, filename };
+            }
+        }
+        
+        return { imageBuffer: null, filename: null };
+    }
+
+    /**
+     * 处理批量OCR识别
+     */
+    async handleBatchOCR(req, res) {
+        if (req.method !== 'POST') {
+            res.writeHead(405, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Method not allowed' }));
+            return;
+        }
+
+        try {
+            const body = await this.getRequestBody(req);
+            const { imageUrls, options = {} } = JSON.parse(body);
+            
+            if (!imageUrls || !Array.isArray(imageUrls)) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid imageUrls parameter' }));
+                return;
+            }
+            
+            const results = [];
+            
+            for (const imageUrl of imageUrls) {
+                try {
+                    const ocrResult = await this.performOCR(imageUrl);
+                    results.push({
+                        imageUrl,
+                        text: ocrResult.text || '',
+                        confidence: ocrResult.confidence || 0,
+                        success: true
+                    });
+                } catch (error) {
+                    console.error(`OCR failed for ${imageUrl}:`, error);
+                    results.push({
+                        imageUrl,
+                        text: '',
+                        confidence: 0,
+                        success: false,
+                        error: error.message
+                    });
+                }
+            }
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: true,
+                results,
+                totalProcessed: results.length,
+                successCount: results.filter(r => r.success).length
+            }));
+            
+        } catch (error) {
+            console.error('Batch OCR error:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Batch OCR failed' }));
+        }
+    }
+
+    /**
+     * 执行OCR识别
+     */
+    async performOCR(imageUrl) {
+        const ocrApiKey = process.env.GLM_API_KEY;
+        
+        if (!ocrApiKey) {
+            console.log('OCR API key not configured, returning mock result');
+            return {
+                text: '这是模拟的OCR识别结果。请配置GLM_API_KEY环境变量以使用真实的OCR功能。',
+                confidence: 0.8
+            };
+        }
+        
+        try {
+            const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${ocrApiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'glm-4v',
+                    messages: [{
+                        role: 'user',
+                        content: [{
+                            type: 'text',
+                            text: '请识别图片中的所有文字内容，保持原有的格式和结构，直接输出识别的文字，不要添加任何解释。'
+                        }, {
+                            type: 'image_url',
+                            image_url: {
+                                url: imageUrl
+                            }
+                        }]
+                    }],
+                    temperature: 0.1
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`OCR API请求失败: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.choices && result.choices[0] && result.choices[0].message) {
+                return {
+                    text: result.choices[0].message.content.trim(),
+                    confidence: 0.95
+                };
+            } else {
+                throw new Error('OCR API返回格式错误');
+            }
+        } catch (error) {
+            console.error('OCR识别失败:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 处理保存笔记到GitHub
+     */
+    async handleSaveNote(req, res) {
+        if (req.method !== 'POST') {
+            res.writeHead(405, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Method not allowed' }));
+            return;
+        }
+
+        try {
+            const body = await this.getRequestBody(req);
+            const { filename, content, branch = 'main', commitMessage } = JSON.parse(body);
+            
+            if (!filename || !content) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Missing filename or content' }));
+                return;
+            }
+            
+            const owner = process.env.GITHUB_REPO_OWNER || 'Twis06';
+            const repo = process.env.GITHUB_REPO_NAME || 'notes';
+            
+            // 检查文件是否存在以获取SHA
+            let existingFile = null;
+            try {
+                const fileCheck = await this.callGitHubAPI(`/repos/${owner}/${repo}/contents/${filename}?ref=${branch}`);
+                if (fileCheck.success) {
+                    existingFile = fileCheck.data;
+                }
+            } catch (error) {
+                // 文件不存在，继续创建新文件
+            }
+            
+            // 构建保存数据
+            const saveData = {
+                message: commitMessage || `Add handwritten notes: ${filename}`,
+                content: Buffer.from(content).toString('base64'),
+                branch: branch
+            };
+            
+            // 如果文件存在，添加SHA
+            if (existingFile && existingFile.sha) {
+                saveData.sha = existingFile.sha;
+            }
+            
+            const result = await this.callGitHubAPI(`/repos/${owner}/${repo}/contents/${filename}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(saveData)
+            });
+            
+            if (result.success) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: true,
+                    path: filename,
+                    branch: branch,
+                    url: result.data.content.html_url
+                }));
+            } else {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: result.error }));
+            }
+            
+        } catch (error) {
+            console.error('Save note error:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Save note failed' }));
+        }
+    }
+
+    /**
+     * 处理本地同步
+     */
+    async handleLocalSync(req, res) {
+        if (req.method !== 'POST') {
+            res.writeHead(405, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Method not allowed' }));
+            return;
+        }
+
+        try {
+            const body = await this.getRequestBody(req);
+            const { localPath, branch = 'main', safeMode = true } = JSON.parse(body);
+            
+            if (!localPath) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Missing localPath parameter' }));
+                return;
+            }
+            
+            const { spawn } = require('child_process');
+            
+            // 检查本地路径是否存在
+            if (!fs.existsSync(localPath)) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Local path does not exist' }));
+                return;
+            }
+            
+            // 执行git pull
+            const gitPull = spawn('git', ['pull', 'origin', branch], {
+                cwd: localPath,
+                stdio: 'pipe'
+            });
+            
+            let output = '';
+            let errorOutput = '';
+            
+            gitPull.stdout.on('data', (data) => {
+                output += data.toString();
+            });
+            
+            gitPull.stderr.on('data', (data) => {
+                errorOutput += data.toString();
+            });
+            
+            gitPull.on('close', (code) => {
+                if (code === 0) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: true,
+                        output: output.trim(),
+                        branch,
+                        localPath
+                    }));
+                } else {
+                    // 如果pull失败且启用安全模式，尝试创建新分支
+                    if (safeMode && errorOutput.includes('conflict')) {
+                        const newBranch = `sync-conflict-${Date.now()}`;
+                        const gitCheckout = spawn('git', ['checkout', '-b', newBranch], {
+                            cwd: localPath,
+                            stdio: 'pipe'
+                        });
+                        
+                        gitCheckout.on('close', (checkoutCode) => {
+                            if (checkoutCode === 0) {
+                                res.writeHead(200, { 'Content-Type': 'application/json' });
+                                res.end(JSON.stringify({
+                                    success: true,
+                                    conflict: true,
+                                    newBranch,
+                                    message: 'Created new branch due to conflicts',
+                                    output: errorOutput
+                                }));
+                            } else {
+                                res.writeHead(500, { 'Content-Type': 'application/json' });
+                                res.end(JSON.stringify({
+                                    error: 'Git pull failed and could not create new branch',
+                                    output: errorOutput
+                                }));
+                            }
+                        });
+                    } else {
+                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({
+                            error: 'Git pull failed',
+                            output: errorOutput
+                        }));
+                    }
+                }
+            });
+            
+        } catch (error) {
+            console.error('Local sync error:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Local sync failed' }));
+        }
+    }
+
+    /**
+     * 获取请求体内容
+     */
+    async getRequestBody(req) {
+        return new Promise((resolve, reject) => {
+            let body = '';
+            req.on('data', chunk => {
+                body += chunk.toString();
+            });
+            req.on('end', () => {
+                resolve(body);
+            });
+            req.on('error', reject);
+        });
     }
 
     /**

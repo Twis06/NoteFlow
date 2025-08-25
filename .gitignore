@@ -18,4 +18,5 @@ backend/.dev.vars
 # Editor
 .vscode/
 .idea/
-.env.env
+.env
+.env
