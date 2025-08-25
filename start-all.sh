@@ -68,10 +68,10 @@ fi
 echo "🌐 2. 启动前端静态服务器 (端口: 8080)..."
 # 使用Python启动简单的HTTP服务器
 if command -v python3 &> /dev/null; then
-    python3 -m http.server 8080 &
+    python3 -m http.server 8080 > /dev/null 2>&1 &
     FRONTEND_PID=$!
 elif command -v python &> /dev/null; then
-    python -m SimpleHTTPServer 8080 &
+    python -m SimpleHTTPServer 8080 > /dev/null 2>&1 &
     FRONTEND_PID=$!
 else
     echo "   ❌ 未找到Python，无法启动前端服务器"
@@ -80,10 +80,19 @@ fi
 
 # 等待前端启动
 echo "   ⏳ 等待前端服务启动..."
-sleep 2
+sleep 3
 
-# 检查前端是否启动成功
-if curl -s http://localhost:8080 > /dev/null; then
+# 检查前端是否启动成功 - 多次尝试
+FRONTEND_READY=false
+for i in {1..5}; do
+    if curl -s http://localhost:8080 > /dev/null 2>&1; then
+        FRONTEND_READY=true
+        break
+    fi
+    sleep 1
+done
+
+if [ "$FRONTEND_READY" = true ]; then
     echo "   ✅ 前端服务启动成功"
 else
     echo "   ❌ 前端服务启动失败"

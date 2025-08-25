@@ -3,7 +3,6 @@
  * 使用真实的Cloudflare Images和GitHub API
  */
 const http = require('http');
-const url = require('url');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
@@ -122,7 +121,7 @@ class RealAPIServer {
      * 处理API请求
      */
     async handleRequest(req, res) {
-        const parsedUrl = url.parse(req.url, true);
+        const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
         const pathname = parsedUrl.pathname;
         const method = req.method;
 
@@ -1051,7 +1050,7 @@ class RealAPIServer {
                         role: 'user',
                         content: [{
                             type: 'text',
-                            text: '请识别图片中的所有文字内容，保持原有的格式和结构，直接输出识别的文字，不要添加任何解释。'
+                            text: '请准确识别以下手写内容并严格遵循以下要求：\n1. 仅输出识别出的文字内容\n2. 使用Markdown格式规范排版：\n   - 标题使用#符号\n   - 段落间空一行\n   - 列表项使用*或-符号\n   - 注意数学公式用$...$或$$...$$格式\n3. 不添加任何解释性文字或额外信息，仅作语法、拼写修正，排版优化'
                         }, {
                             type: 'image_url',
                             image_url: {

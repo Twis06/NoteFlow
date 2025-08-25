@@ -1,5 +1,4 @@
 const http = require('http');
-const url = require('url');
 const fs = require('fs');
 const path = require('path');
 
@@ -27,7 +26,7 @@ class SimpleAPIServer {
      * 处理API请求
      */
     handleRequest(req, res) {
-        const parsedUrl = url.parse(req.url, true);
+        const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
         const pathname = parsedUrl.pathname;
         const method = req.method;
 

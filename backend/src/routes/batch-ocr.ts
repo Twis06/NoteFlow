@@ -205,14 +205,14 @@ async function performOCRRecognition(imageSource: string, options: any) {
   
   const { language = 'zh-CN', enhance = true } = options;
   
-  const prompt = `请识别这张手写图片中的所有文字内容。要求：
-1. 准确识别所有手写文字
-2. 保持原有的段落结构和换行
-3. 如果有数学公式，请用LaTeX格式表示
-4. 如果有图表或特殊符号，请用文字描述
-5. 输出格式为纯文本，不需要额外的格式化
-
-请直接输出识别的文字内容：`;
+  const prompt = `请准确识别以下手写内容并严格遵循以下要求：
+1. 仅输出识别出的文字内容
+2. 使用Markdown格式规范排版：
+   - 标题使用#符号
+   - 段落间空一行
+   - 列表项使用*或-符号
+   - 注意数学公式用$...$或$$...$$格式
+3. 不添加任何解释性文字或额外信息，仅作语法、拼写修正，排版优化`;
   
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
