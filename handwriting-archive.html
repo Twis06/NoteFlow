@@ -997,7 +997,10 @@
             async saveToGitHub(markdownContent) {
                 this.log('保存到GitHub...', 'info');
                 
-                const filename = `handwritten-notes-${new Date().toISOString().split('T')[0]}.md`;
+                // 生成精确到分钟的文件名，避免同一天内的文件被覆盖
+                const now = new Date();
+                const dateStr = now.toISOString().slice(0, 16).replace('T', '_').replace(/:/g, '-'); // YYYY-MM-DD_HH-MM
+                const filename = `handwritten-notes-${dateStr}.md`;
                 
                 const response = await fetch(`${this.apiBaseUrl}/api/github/save-note`, {
                     method: 'POST',

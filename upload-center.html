@@ -1286,15 +1286,20 @@
                 this.showLoading('正在同步到GitHub...');
 
                 try {
-                    const documents = this.processingResults.map(result => ({
-                        filename: `handwritten_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.md`,
-                        content: result.markdownContent,
-                        metadata: {
-                            originalImage: result.imageUrl,
-                            confidence: result.confidence,
-                            processedAt: new Date().toISOString()
-                        }
-                    }));
+                    const documents = this.processingResults.map((result, index) => {
+                        // 生成精确到分钟的文件名，避免覆盖
+                        const now = new Date();
+                        const dateStr = now.toISOString().slice(0, 16).replace('T', '_').replace(/:/g, '-'); // YYYY-MM-DD_HH-MM
+                        return {
+                            filename: `handwritten_${dateStr}_${index + 1}.md`,
+                            content: result.markdownContent,
+                            metadata: {
+                                originalImage: result.imageUrl,
+                                confidence: result.confidence,
+                                processedAt: new Date().toISOString()
+                            }
+                        };
+                    });
 
                     const response = await fetch(`${this.apiBase}/api/github-sync/sync`, {
                         method: 'POST',

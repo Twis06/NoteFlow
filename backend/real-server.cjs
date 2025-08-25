@@ -889,14 +889,15 @@ class RealAPIServer {
         }
         
         try {
-            const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+            // 使用SiliconFlow API进行OCR识别
+            const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${ocrApiKey}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: 'glm-4v',
+                    model: 'zai-org/GLM-4.5V',
                     messages: [{
                         role: 'user',
                         content: [{
