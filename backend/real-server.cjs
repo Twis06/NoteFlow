@@ -418,7 +418,7 @@ class RealAPIServer {
             setTimeout(() => {
                 const response = {
                     success: true,
-                    message: '清理完成（真实API服务器）',
+                    message: '清理完成',
                     cleaned: 3,
                     freedSpace: 5242880,
                     serverType: 'real-api'
@@ -703,6 +703,28 @@ class RealAPIServer {
             // 开始扫描
             await scanDirectory(targetDirectory);
 
+            // 如果不是预览模式且有文件被修改，执行GitHub同步
+            if (!dryRun && results.filesModified > 0) {
+                try {
+                    console.log('开始执行GitHub同步...');
+                    const syncResult = await this.performGitHubSync(targetDirectory, results);
+                    results.githubSync = syncResult;
+                    
+                    if (syncResult.success) {
+                        console.log('GitHub同步成功');
+                    } else {
+                        console.warn('GitHub同步失败:', syncResult.error);
+                        // 同步失败不影响主要功能，只记录警告
+                        results.warnings = results.warnings || [];
+                        results.warnings.push(`GitHub同步失败: ${syncResult.error}`);
+                    }
+                } catch (error) {
+                    console.error('GitHub同步过程中出错:', error);
+                    results.warnings = results.warnings || [];
+                    results.warnings.push(`GitHub同步异常: ${error.message}`);
+                }
+            }
+
             return results;
         } catch (error) {
             return {
@@ -710,6 +732,133 @@ class RealAPIServer {
                 error: error.message,
                 serverType: 'real-api'
             };
+        }
+    }
+
+    /**
+     * 执行GitHub同步操作
+     * 包含防护机制：检查版本冲突，自动pull，创建备份分支等
+     */
+    async performGitHubSync(targetDirectory, batchResults) {
+        const { execSync } = require('child_process');
+        const originalCwd = process.cwd();
+        
+        try {
+            // 切换到目标目录
+            process.chdir(targetDirectory);
+            
+            // 1. 检查是否是git仓库
+            try {
+                execSync('git rev-parse --git-dir', { stdio: 'ignore' });
+            } catch (error) {
+                return {
+                    success: false,
+                    error: '目标目录不是Git仓库',
+                    step: 'check_git_repo'
+                };
+            }
+            
+            // 2. 检查工作区状态
+            const status = execSync('git status --porcelain', { encoding: 'utf8' });
+            console.log('Git状态检查:', status ? '有未提交的更改' : '工作区干净');
+            
+            // 3. 获取当前分支
+            const currentBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim();
+            console.log('当前分支:', currentBranch);
+            
+            // 4. 尝试从远程拉取最新更改（防护机制）
+            try {
+                console.log('正在从远程拉取最新更改...');
+                execSync('git fetch origin', { stdio: 'pipe' });
+                
+                // 检查是否有远程更新
+                const behindCount = execSync(`git rev-list --count HEAD..origin/${currentBranch}`, { encoding: 'utf8' }).trim();
+                
+                if (parseInt(behindCount) > 0) {
+                    console.log(`检测到远程有 ${behindCount} 个新提交，正在合并...`);
+                    
+                    // 如果有本地更改，先暂存
+                    if (status) {
+                        console.log('暂存本地更改...');
+                        execSync('git stash push -m "Auto-stash before sync"', { stdio: 'pipe' });
+                    }
+                    
+                    // 拉取远程更改
+                    execSync(`git pull origin ${currentBranch}`, { stdio: 'pipe' });
+                    
+                    // 如果之前暂存了更改，恢复它们
+                    if (status) {
+                        try {
+                            console.log('恢复暂存的更改...');
+                            execSync('git stash pop', { stdio: 'pipe' });
+                        } catch (stashError) {
+                            console.warn('恢复暂存更改时出现冲突，创建备份分支...');
+                            const backupBranch = `backup-batch-replace-${Date.now()}`;
+                            execSync(`git checkout -b ${backupBranch}`, { stdio: 'pipe' });
+                            execSync('git stash pop', { stdio: 'pipe' });
+                            
+                            return {
+                                success: false,
+                                error: `检测到合并冲突，已创建备份分支: ${backupBranch}`,
+                                step: 'merge_conflict',
+                                backupBranch: backupBranch
+                            };
+                        }
+                    }
+                }
+            } catch (fetchError) {
+                console.warn('拉取远程更改失败:', fetchError.message);
+                // 继续执行，但记录警告
+            }
+            
+            // 5. 添加修改的文件
+            console.log('添加修改的文件到Git...');
+            for (const modifiedFile of batchResults.modifiedFiles) {
+                try {
+                    execSync(`git add "${modifiedFile.path}"`, { stdio: 'pipe' });
+                } catch (addError) {
+                    console.warn(`添加文件失败: ${modifiedFile.path}`, addError.message);
+                }
+            }
+            
+            // 6. 检查是否有文件被添加
+            const stagedFiles = execSync('git diff --cached --name-only', { encoding: 'utf8' }).trim();
+            if (!stagedFiles) {
+                return {
+                    success: true,
+                    message: '没有需要提交的更改',
+                    step: 'no_changes'
+                };
+            }
+            
+            // 7. 提交更改
+            const commitMessage = `批量替换图片链接: 处理了${batchResults.filesModified}个文件，替换了${batchResults.replacements}个图片链接\n\n自动提交时间: ${new Date().toISOString()}`;
+            console.log('提交更改...');
+            execSync(`git commit -m "${commitMessage}"`, { stdio: 'pipe' });
+            
+            // 8. 推送到远程仓库
+            console.log('推送到远程仓库...');
+            execSync(`git push origin ${currentBranch}`, { stdio: 'pipe' });
+            
+            return {
+                success: true,
+                message: 'GitHub同步成功',
+                branch: currentBranch,
+                filesCommitted: stagedFiles.split('\n').length,
+                commitMessage: commitMessage,
+                step: 'completed'
+            };
+            
+        } catch (error) {
+            console.error('GitHub同步失败:', error);
+            return {
+                success: false,
+                error: error.message,
+                step: 'sync_error'
+            };
+        } finally {
+            // 恢复原始工作目录
+            process.chdir(originalCwd);
         }
     }
 
@@ -1130,7 +1279,7 @@ class RealAPIServer {
         });
 
         this.server.listen(this.port, () => {
-            console.log(`\n🚀 真实API服务器已启动`);
+            console.log(`\n服务器已启动`);
             console.log(`📡 监听端口: ${this.port}`);
             console.log(`🌐 API地址: http://localhost:${this.port}`);
             console.log(`📊 状态检查: http://localhost:${this.port}/api/stats`);
