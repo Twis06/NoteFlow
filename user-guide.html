@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能笔记处理系统 - 用户指南</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #48bb78;
+            --warning-color: #ed8936;
+            --error-color: #f56565;
+            --info-color: #4299e1;
+            --bg-primary: #f7fafc;
+            --bg-secondary: #edf2f7;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: 16px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .nav-tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .nav-tab:hover {
+            color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .step-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+
+        .step-item {
+            counter-increment: step-counter;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-color);
+            position: relative;
+        }
+
+        .step-item::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: -2px;
+            top: -10px;
+            width: 30px;
+            height: 30px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .step-description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .highlight {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .alert-info {
+            background: rgba(66, 153, 225, 0.1);
+            border-left: 4px solid var(--info-color);
+            color: var(--info-color);
+        }
+
+        .alert-warning {
+            background: rgba(237, 137, 54, 0.1);
+            border-left: 4px solid var(--warning-color);
+            color: var(--warning-color);
+        }
+
+        .alert-success {
+            background: rgba(72, 187, 120, 0.1);
+            border-left: 4px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .toc {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .toc h3 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        .toc a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .toc a:hover {
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+
+            .nav-tab {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-book-open"></i> 智能笔记处理系统</h1>
+            <p>完整的用户使用指南和最佳实践</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="overview">系统概览</button>
+            <button class="nav-tab" data-tab="quick-start">快速开始</button>
+            <button class="nav-tab" data-tab="features">功能详解</button>
+            <button class="nav-tab" data-tab="api">API文档</button>
+            <button class="nav-tab" data-tab="troubleshooting">故障排除</button>
+            <button class="nav-tab" data-tab="faq">常见问题</button>
+        </div>
+
+        <!-- 系统概览 -->
+        <div id="overview" class="tab-content active">
+            <div class="toc">
+                <h3><i class="fas fa-list"></i> 目录</h3>
+                <ul>
+                    <li><a href="#system-architecture">系统架构</a></li>
+                    <li><a href="#core-features">核心功能</a></li>
+                    <li><a href="#supported-formats">支持格式</a></li>
+                    <li><a href="#system-requirements">系统要求</a></li>
+                </ul>
+            </div>
+
+            <div class="card" id="system-architecture">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-sitemap"></i>
+                    </div>
+                    <h2 class="card-title">系统架构</h2>
+                </div>
+                <div class="card-content">
+                    <p>智能笔记处理系统采用现代化的微服务架构，主要包含以下组件：</p>
+                    
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-cloud"></i>
+                            </div>
+                            <div class="feature-title">Cloudflare Workers</div>
+                            <div class="feature-description">无服务器后端，提供高性能的API服务和全球CDN加速</div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-images"></i>
+                            </div>
+                            <div class="feature-title">Cloudflare Images</div>
+                            <div class="feature-description">专业的图片存储和处理服务，支持多种格式和自动优化</div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="feature-title">多模态AI</div>
+                            <div class="feature-description">集成GLM-4V、OpenAI等多个AI服务，提供强大的OCR和理解能力</div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fab fa-github"></i>
+                            </div>
+                            <div class="feature-title">GitHub集成</div>
+                            <div class="feature-description">自动同步到GitHub仓库，支持版本控制和协作</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="core-features">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h2 class="card-title">核心功能</h2>
+                </div>
+                <div class="card-content">
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-pen-fancy"></i>
+                            </div>
+                            <div class="feature-title">手写笔记OCR</div>
+                            <div class="feature-description">高精度识别手写文字，支持中英文混合和数学公式</div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <div class="feature-title">智能同步</div>
+                            <div class="feature-description">自动同步到Obsidian和GitHub，支持增量更新</div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-link"></i>
+                            </div>
+                            <div class="feature-title">链接管理</div>
+                            <div class="feature-description">自动替换本地链接为CDN链接，优化访问速度</div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <div class="feature-title">批量处理</div>
+                            <div class="feature-description">支持批量上传和处理，提高工作效率</div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div class="feature-title">Telegram集成</div>
+                            <div class="feature-description">通过Telegram Bot快速上传和处理图片</div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="feature-title">自动化工作流</div>
+                            <div class="feature-description">可配置的自动化任务，减少重复操作</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="supported-formats">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h2 class="card-title">支持格式</h2>
+                </div>
+                <div class="card-content">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                        <div>
+                            <h4 style="margin-bottom: 1rem; color: var(--primary-color);">图片格式</h4>
+                            <ul style="list-style-type: none; padding: 0;">
+                                <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i>JPEG (.jpg, .jpeg)</li>
+                                <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i>PNG (.png)</li>
+                                <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i>WebP (.webp)</li>
+                                <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i>GIF (.gif)</li>
+                                <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i>BMP (.bmp)</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 style="margin-bottom: 1rem; color: var(--primary-color);">文档格式</h4>
+                            <ul style="list-style-type: none; padding: 0;">
+                                <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i>Markdown (.md)</li>
+                                <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i>纯文本 (.txt)</li>
+                                <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i>HTML (.html)</li>
+                                <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i>LaTeX (.tex)</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 style="margin-bottom: 1rem; color: var(--primary-color);">输出格式</h4>
+                            <ul style="list-style-type: none; padding: 0;">
+                                <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i>Obsidian Markdown</li>
+                                <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i>标准 Markdown</li>
+                                <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i>JSON 数据</li>
+                                <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i>纯文本</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快速开始 -->
+        <div id="quick-start" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h2 class="card-title">5分钟快速上手</h2>
+                </div>
+                <div class="card-content">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <strong>开始之前</strong><br>
+                            确保您已经完成了系统的基本配置，包括API密钥设置和环境变量配置。
+                        </div>
+                    </div>
+
+                    <ol class="step-list">
+                        <li class="step-item">
+                            <div class="step-title">访问管理控制台</div>
+                            <div class="step-description">
+                                打开浏览器，访问管理控制台地址。如果是本地部署，通常是 <span class="highlight">http://localhost:8787/admin-dashboard.html</span>
+                            </div>
+                            <div class="code-block">
+# 本地开发环境
+http://localhost:8787/admin-dashboard.html
+
+# 生产环境
+https://your-domain.com/admin-dashboard.html
+                            </div>
+                        </li>
+
+                        <li class="step-item">
+                            <div class="step-title">配置API密钥</div>
+                            <div class="step-description">
+                                在系统设置页面中配置必要的API密钥，包括Cloudflare、GLM-4V、Telegram等服务的认证信息。
+                            </div>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <div>请妥善保管您的API密钥，不要在公共场所或不安全的网络环境中输入。</div>
+                            </div>
+                        </li>
+
+                        <li class="step-item">
+                            <div class="step-title">上传第一张手写笔记</div>
+                            <div class="step-description">
+                                进入"手写笔记处理"页面，拖拽或选择一张手写笔记图片进行上传和处理。
+                            </div>
+                            <div class="alert alert-success">
+                                <i class="fas fa-lightbulb"></i>
+                                <div>建议使用清晰、光线充足的图片，这样可以获得更好的OCR识别效果。</div>
+                            </div>
+                        </li>
+
+                        <li class="step-item">
+                            <div class="step-title">查看处理结果</div>
+                            <div class="step-description">
+                                系统会自动进行OCR识别，生成Markdown格式的笔记，并可选择同步到GitHub或Obsidian。
+                            </div>
+                        </li>
+
+                        <li class="step-item">
+                            <div class="step-title">配置自动同步</div>
+                            <div class="step-description">
+                                在"笔记同步控制"页面配置自动同步规则，让系统自动管理您的笔记库。
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h2 class="card-title">Telegram Bot 快速使用</h2>
+                </div>
+                <div class="card-content">
+                    <ol class="step-list">
+                        <li class="step-item">
+                            <div class="step-title">添加Bot</div>
+                            <div class="step-description">
+                                在Telegram中搜索您的Bot用户名，点击开始对话。
+                            </div>
+                        </li>
+
+                        <li class="step-item">
+                            <div class="step-title">发送图片</div>
+                            <div class="step-description">
+                                直接发送手写笔记图片给Bot，支持一次发送多张图片。
+                            </div>
+                            <div class="code-block">
+# Bot会自动处理90秒内发送的所有图片
+# 发送 /end 命令可以立即结束当前会话并生成笔记
+                            </div>
+                        </li>
+
+                        <li class="step-item">
+                            <div class="step-title">获取结果</div>
+                            <div class="step-description">
+                                Bot会返回处理结果，包括识别的文字内容和生成的Markdown文件链接。
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能详解 -->
+        <div id="features" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-pen-fancy"></i>
+                    </div>
+                    <h2 class="card-title">手写笔记OCR处理</h2>
+                </div>
+                <div class="card-content">
+                    <h3 style="margin-bottom: 1rem;">支持的OCR提供商</h3>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-title">GLM-4V (推荐)</div>
+                            <div class="feature-description">智谱AI的多模态大模型，支持复杂场景理解和数学公式识别</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-title">百度OCR</div>
+                            <div class="feature-description">成熟稳定的OCR服务，中文识别准确率高</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-title">腾讯OCR</div>
+                            <div class="feature-description">腾讯云OCR服务，支持多种场景和语言</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-title">阿里云OCR</div>
+                            <div class="feature-description">阿里云文字识别服务，企业级可靠性</div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 2rem 0 1rem;">处理选项说明</h3>
+                    <div style="display: grid; gap: 1rem;">
+                        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px;">
+                            <strong>启用公式识别</strong><br>
+                            <span style="color: var(--text-secondary);">自动识别数学公式并转换为LaTeX格式，适合学术笔记</span>
+                        </div>
+                        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px;">
+                            <strong>智能格式化</strong><br>
+                            <span style="color: var(--text-secondary);">自动优化文本格式，包括段落分割、标题识别等</span>
+                        </div>
+                        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px;">
+                            <strong>自动备份原图</strong><br>
+                            <span style="color: var(--text-secondary);">保留原始图片文件，便于后续查看和对比</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h2 class="card-title">智能同步系统</h2>
+                </div>
+                <div class="card-content">
+                    <h3 style="margin-bottom: 1rem;">同步模式</h3>
+                    <div style="display: grid; gap: 1rem; margin-bottom: 2rem;">
+                        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px;">
+                            <strong>自动同步</strong><br>
+                            <span style="color: var(--text-secondary);">系统自动检测文件变化并进行同步，无需手动干预</span>
+                        </div>
+                        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px;">
+                            <strong>手动同步</strong><br>
+                            <span style="color: var(--text-secondary);">完全由用户控制同步时机，适合精确控制的场景</span>
+                        </div>
+                        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px;">
+                            <strong>定时同步</strong><br>
+                            <span style="color: var(--text-secondary);">按照设定的时间间隔自动执行同步操作</span>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 1rem;">同步目标</h3>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="feature-title">Obsidian</div>
+                            <div class="feature-description">直接同步到Obsidian笔记库，支持双向同步和冲突解决</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fab fa-github"></i>
+                            </div>
+                            <div class="feature-title">GitHub</div>
+                            <div class="feature-description">版本控制和云端备份，支持多人协作和历史版本管理</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-cloud"></i>
+                            </div>
+                            <div class="feature-title">云存储</div>
+                            <div class="feature-description">支持多种云存储服务，确保数据安全和可访问性</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <h2 class="card-title">链接替换管理</h2>
+                </div>
+                <div class="card-content">
+                    <p>自动将本地图片链接替换为CDN链接，提高访问速度和可靠性。</p>
+                    
+                    <h3 style="margin: 2rem 0 1rem;">替换规则示例</h3>
+                    <div class="code-block">
+# 本地附件路径 → CDN链接
+attachments/image.png → https://cdn.example.com/images/image.png
+
+# 相对路径 → 绝对路径
+./images/photo.jpg → https://your-domain.com/images/photo.jpg
+
+# 支持通配符匹配
+attachments/*.* → https://cdn.example.com/attachments/*.*
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <strong>智能识别</strong><br>
+                            系统会自动识别Markdown文件中的图片链接，并根据配置的规则进行替换。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API文档 -->
+        <div id="api" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h2 class="card-title">API接口文档</h2>
+                </div>
+                <div class="card-content">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <strong>API基础地址</strong><br>
+                            本地开发: <code>http://localhost:8787</code><br>
+                            生产环境: <code>https://your-domain.com</code>
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 2rem 0 1rem;">手写笔记处理</h3>
+                    <div class="code-block">
+# 单张图片处理
+POST /api/process/handwritten
+Content-Type: multipart/form-data
+
+# 请求体
+image: [图片文件]
+options: {
+  "provider": "glm4v",
+  "enableFormula": true,
+  "smartFormatting": true,
+  "autoBackup": true
+}
+
+# 响应
+{
+  "success": true,
+  "data": {
+    "text": "识别的文字内容",
+    "markdown": "生成的Markdown内容",
+    "imageUrl": "https://cdn.example.com/image.jpg",
+    "confidence": 0.95
+  }
+}
+                    </div>
+
+                    <h3 style="margin: 2rem 0 1rem;">批量处理</h3>
+                    <div class="code-block">
+# 批量图片处理
+POST /api/process/handwritten-batch
+Content-Type: application/json
+
+# 请求体
+{
+  "images": [
+    {
+      "data": "base64编码的图片数据",
+      "filename": "image1.jpg"
+    }
+  ],
+  "options": {
+    "provider": "glm4v",
+    "maxConcurrency": 3
+  }
+}
+
+# 响应
+{
+  "success": true,
+  "data": {
+    "results": [...],
+    "summary": {
+      "total": 5,
+      "success": 4,
+      "failed": 1
+    }
+  }
+}
+                    </div>
+
+                    <h3 style="margin: 2rem 0 1rem;">同步控制</h3>
+                    <div class="code-block">
+# 获取同步状态
+GET /api/sync/status
+
+# 响应
+{
+  "success": true,
+  "data": {
+    "lastSync": "2024-01-15T14:30:25Z",
+    "syncedFiles": 156,
+    "pendingFiles": 3,
+    "status": "normal"
+  }
+}
+
+# 手动触发同步
+POST /api/sync/manual
+{
+  "target": "github",
+  "force": false
+}
+                    </div>
+
+                    <h3 style="margin: 2rem 0 1rem;">链接替换</h3>
+                    <div class="code-block">
+# 批量链接替换
+POST /api/cdn-replacement/batch
+{
+  "sourcePattern": "attachments/*.png",
+  "targetPattern": "https://cdn.example.com/{filename}",
+  "scope": "all"
+}
+
+# 响应
+{
+  "success": true,
+  "data": {
+    "processedFiles": 23,
+    "replacedLinks": 67,
+    "errors": []
+  }
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 故障排除 -->
+        <div id="troubleshooting" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h2 class="card-title">常见问题排除</h2>
+                </div>
+                <div class="card-content">
+                    <h3 style="margin-bottom: 1rem;">连接问题</h3>
+                    <div style="margin-bottom: 2rem;">
+                        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px; margin-bottom: 1rem;">
+                            <strong>问题：无法访问管理控制台</strong><br>
+                            <span style="color: var(--text-secondary);">解决方案：</span>
+                            <ul style="margin-top: 0.5rem; color: var(--text-secondary);">
+                                <li>检查服务器是否正常运行</li>
+                                <li>确认端口号是否正确（默认8787）</li>
+                                <li>检查防火墙设置</li>
+                                <li>查看浏览器控制台错误信息</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px; margin-bottom: 1rem;">
+                            <strong>问题：API请求失败</strong><br>
+                            <span style="color: var(--text-secondary);">解决方案：</span>
+                            <ul style="margin-top: 0.5rem; color: var(--text-secondary);">
+                                <li>检查API密钥是否正确配置</li>
+                                <li>确认网络连接正常</li>
+                                <li>查看服务器日志获取详细错误信息</li>
+                                <li>验证请求格式是否符合API规范</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 1rem;">OCR识别问题</h3>
+                    <div style="margin-bottom: 2rem;">
+                        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px; margin-bottom: 1rem;">
+                            <strong>问题：识别准确率低</strong><br>
+                            <span style="color: var(--text-secondary);">解决方案：</span>
+                            <ul style="margin-top: 0.5rem; color: var(--text-secondary);">
+                                <li>确保图片清晰度足够高</li>
+                                <li>避免图片过暗或过亮</li>
+                                <li>尝试不同的OCR提供商</li>
+                                <li>调整图片大小和格式</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px; margin-bottom: 1rem;">
+                            <strong>问题：数学公式识别失败</strong><br>
+                            <span style="color: var(--text-secondary);">解决方案：</span>
+                            <ul style="margin-top: 0.5rem; color: var(--text-secondary);">
+                                <li>使用GLM-4V提供商（推荐）</li>
+                                <li>确保公式书写清晰规范</li>
+                                <li>启用公式识别选项</li>
+                                <li>手动校对和修正结果</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 1rem;">同步问题</h3>
+                    <div style="margin-bottom: 2rem;">
+                        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px; margin-bottom: 1rem;">
+                            <strong>问题：GitHub同步失败</strong><br>
+                            <span style="color: var(--text-secondary);">解决方案：</span>
+                            <ul style="margin-top: 0.5rem; color: var(--text-secondary);">
+                                <li>检查GitHub Token权限</li>
+                                <li>确认仓库地址正确</li>
+                                <li>检查网络连接到GitHub</li>
+                                <li>查看同步日志获取详细信息</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px; margin-bottom: 1rem;">
+                            <strong>问题：文件冲突</strong><br>
+                            <span style="color: var(--text-secondary);">解决方案：</span>
+                            <ul style="margin-top: 0.5rem; color: var(--text-secondary);">
+                                <li>使用强制同步选项</li>
+                                <li>手动解决冲突文件</li>
+                                <li>备份重要数据后重新同步</li>
+                                <li>调整同步策略和规则</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>
+                            <strong>重要提醒</strong><br>
+                            在进行任何故障排除操作之前，请务必备份重要数据，避免数据丢失。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 常见问题 -->
+        <div id="faq" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <h2 class="card-title">常见问题解答</h2>
+                </div>
+                <div class="card-content">
+                    <div style="display: grid; gap: 1.5rem;">
+                        <div style="padding: 1.5rem; background: var(--bg-primary); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+                            <h4 style="margin-bottom: 0.5rem; color: var(--primary-color);">Q: 系统支持哪些语言的手写识别？</h4>
+                            <p style="color: var(--text-secondary);">A: 系统主要支持中文和英文的手写识别，部分OCR提供商还支持其他语言。建议使用GLM-4V获得最佳的多语言支持。</p>
+                        </div>
+                        
+                        <div style="padding: 1.5rem; background: var(--bg-primary); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+                            <h4 style="margin-bottom: 0.5rem; color: var(--primary-color);">Q: 如何提高OCR识别的准确率？</h4>
+                            <p style="color: var(--text-secondary);">A: 建议使用高分辨率、光线充足、对比度高的图片。避免图片模糊、倾斜或包含过多噪声。选择合适的OCR提供商也很重要。</p>
+                        </div>
+                        
+                        <div style="padding: 1.5rem; background: var(--bg-primary); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+                            <h4 style="margin-bottom: 0.5rem; color: var(--primary-color);">Q: 系统是否支持批量处理大量图片？</h4>
+                            <p style="color: var(--text-secondary);">A: 是的，系统支持批量处理。您可以设置并发数量来控制处理速度，建议根据服务器性能和API限制合理设置。</p>
+                        </div>
+                        
+                        <div style="padding: 1.5rem; background: var(--bg-primary); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+                            <h4 style="margin-bottom: 0.5rem; color: var(--primary-color);">Q: 如何备份和恢复系统数据？</h4>
+                            <p style="color: var(--text-secondary);">A: 系统会自动备份处理过的图片到Cloudflare Images，生成的Markdown文件会同步到GitHub。建议定期导出配置和重要数据。</p>
+                        </div>
+                        
+                        <div style="padding: 1.5rem; background: var(--bg-primary); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+                            <h4 style="margin-bottom: 0.5rem; color: var(--primary-color);">Q: 系统的安全性如何保障？</h4>
+                            <p style="color: var(--text-secondary);">A: 系统使用HTTPS传输，API密钥加密存储，支持访问控制和审计日志。建议定期更新密钥和检查安全设置。</p>
+                        </div>
+                        
+                        <div style="padding: 1.5rem; background: var(--bg-primary); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+                            <h4 style="margin-bottom: 0.5rem; color: var(--primary-color);">Q: 如何自定义OCR处理流程？</h4>
+                            <p style="color: var(--text-secondary);">A: 您可以在处理选项中配置各种参数，包括OCR提供商、公式识别、格式化选项等。高级用户可以通过API进行更精细的控制。</p>
+                        </div>
+                        
+                        <div style="padding: 1.5rem; background: var(--bg-primary); border-radius: 12px; border-left: 4px solid var(--primary-color);">
+                            <h4 style="margin-bottom: 0.5rem; color: var(--primary-color);">Q: 系统支持哪些第三方集成？</h4>
+                            <p style="color: var(--text-secondary);">A: 目前支持Obsidian、GitHub、Telegram、多个OCR服务商等。我们持续添加更多集成选项，您也可以通过API进行自定义集成。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-life-ring"></i>
+                    </div>
+                    <h2 class="card-title">获取帮助</h2>
+                </div>
+                <div class="card-content">
+                    <p style="margin-bottom: 2rem;">如果您遇到问题或需要更多帮助，可以通过以下方式联系我们：</p>
+                    
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fab fa-github"></i>
+                            </div>
+                            <div class="feature-title">GitHub Issues</div>
+                            <div class="feature-description">在GitHub仓库中提交问题报告或功能请求</div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div class="feature-title">文档中心</div>
+                            <div class="feature-description">查看详细的技术文档和API参考</div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <div class="feature-title">社区讨论</div>
+                            <div class="feature-description">参与社区讨论，分享经验和最佳实践</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 标签页切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.nav-tab');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetTab = this.getAttribute('data-tab');
+                    
+                    // 移除所有活动状态
+                    tabs.forEach(t => t.classList.remove('active'));
+                    contents.forEach(c => {
+                        c.classList.remove('active');
+                        c.style.display = 'none';
+                    });
+                    
+                    // 激活当前标签页
+                    this.classList.add('active');
+                    const targetContent = document.getElementById(targetTab);
+                    if (targetContent) {
+                        targetContent.style.display = 'block';
+                        targetContent.classList.add('active');
+                    }
+                });
+            });
+
+            // 平滑滚动到锚点
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

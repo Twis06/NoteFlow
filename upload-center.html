@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能上传中心 - AI驱动的文档处理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 24px;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background-color: #f7fafc;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background-color: #ebf4ff;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #a0aec0;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .file-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .file-size {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        .status-panel {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .status-item {
+            text-align: center;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 12px;
+        }
+
+        .status-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .status-label {
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .log-area {
+            background: #1a202c;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .settings-panel {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* 文件列表样式 */
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: #2d3748;
+            flex: 1;
+        }
+
+        .file-size {
+            color: #718096;
+            font-size: 0.9em;
+            margin-right: 12px;
+        }
+
+        .remove-btn {
+            background: #f56565;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            transition: background-color 0.2s;
+        }
+
+        .remove-btn:hover {
+            background: #e53e3e;
+        }
+
+        /* 拖拽样式 */
+        .drag-over {
+            border-color: #4299e1 !important;
+            background-color: #ebf8ff !important;
+        }
+
+        /* 结果区域样式 */
+        .result-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .result-header h4 {
+            margin: 0;
+            color: #2d3748;
+            font-size: 1.1em;
+        }
+
+        .confidence {
+            background: #48bb78;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .result-content {
+            display: grid;
+            gap: 16px;
+        }
+
+        .ocr-text, .markdown-content {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .ocr-text h5, .markdown-content h5 {
+            margin: 0 0 12px 0;
+            color: #4a5568;
+            font-size: 0.95em;
+            font-weight: 600;
+        }
+
+        .ocr-text p {
+            margin: 0;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        .markdown-content pre {
+            margin: 0;
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #718096;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8f9fa;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #2d3748;
+        }
+
+        .close-btn {
+            background: #f56565;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            transition: background-color 0.2s;
+        }
+
+        .close-btn:hover {
+            background: #e53e3e;
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .file-tree {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .file-tree-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .file-icon {
+            margin-right: 12px;
+            font-size: 1.2em;
+        }
+
+        .file-tree-item .file-name {
+            flex: 1;
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .file-tree-item .file-size {
+            color: #718096;
+            font-size: 0.9em;
+        }
+
+        /* 消息提示样式 */
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .message-success {
+            background: #48bb78;
+        }
+
+        .message-error {
+            background: #f56565;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 10px;
+            }
+
+            .result-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 智能上传中心</h1>
+            <p>AI驱动的手写文档处理与自动化同步系统</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- 手写图片上传区域 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">
+                        ✍️
+                    </div>
+                    <div class="card-title">手写图片处理</div>
+                </div>
+                
+                <div class="upload-area" id="handwritingUpload">
+                    <div class="upload-icon">📝</div>
+                    <div class="upload-text">拖拽或点击上传手写图片</div>
+                    <div class="upload-hint">支持 JPG, PNG, HEIC 格式，最大 10MB</div>
+                </div>
+                
+                <input type="file" id="handwritingFiles" multiple accept="image/*" style="display: none;">
+                
+                <div class="file-list" id="handwritingFileList"></div>
+                
+                <div class="progress-bar hidden" id="handwritingProgress">
+                    <div class="progress-fill"></div>
+                </div>
+                
+                <button class="btn" id="processHandwriting" disabled>
+                    <span class="loading hidden"></span>
+                    🔄 开始OCR处理
+                </button>
+            </div>
+
+            <!-- GitHub同步区域 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #2ed573, #1e90ff);">
+                        🔄
+                    </div>
+                    <div class="card-title">GitHub同步</div>
+                </div>
+                
+                <div class="settings-panel">
+                    <div class="form-group">
+                        <label class="form-label">仓库地址</label>
+                        <input type="text" class="form-input" id="repoUrl" placeholder="https://github.com/username/repo">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">目标分支</label>
+                        <input type="text" class="form-input" id="targetBranch" value="main">
+                    </div>
+                </div>
+                
+                <button class="btn" id="syncToGithub" disabled>
+                    <span class="loading hidden"></span>
+                    📤 同步到GitHub
+                </button>
+                
+                <button class="btn btn-secondary" id="listRepoFiles" style="margin-left: 10px;">
+                    📋 查看仓库文件
+                </button>
+            </div>
+
+            <!-- CDN替换区域 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #ffa726, #ff7043);">
+                        🌐
+                    </div>
+                    <div class="card-title">CDN URL替换</div>
+                </div>
+                
+                <div class="settings-panel">
+                    <div class="form-group">
+                        <label class="form-label">本地路径</label>
+                        <input type="text" class="form-input" id="localPath" placeholder="/Users/username/Documents/notes">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">附件目录</label>
+                        <input type="text" class="form-input" id="attachmentDir" value="attachments">
+                    </div>
+                </div>
+                
+                <button class="btn" id="replaceCdnUrls">
+                    <span class="loading hidden"></span>
+                    🔗 替换CDN链接
+                </button>
+            </div>
+
+            <!-- 一键处理区域 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #a855f7, #ec4899);">
+                        ⚡
+                    </div>
+                    <div class="card-title">一键自动化</div>
+                </div>
+                
+                <p style="margin-bottom: 20px; color: #718096;">自动执行完整的处理流程：OCR识别 → CDN上传 → GitHub同步</p>
+                
+                <button class="btn" id="oneClickProcess" style="width: 100%; font-size: 1.1rem; padding: 15px;">
+                    <span class="loading hidden"></span>
+                    🚀 一键处理全流程
+                </button>
+            </div>
+        </div>
+
+        <!-- 状态面板 -->
+        <div class="status-panel">
+            <h3 style="margin-bottom: 20px; color: #2d3748;">📊 处理状态</h3>
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-number" id="uploadedCount">0</div>
+                    <div class="status-label">已上传图片</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-number" id="processedCount">0</div>
+                    <div class="status-label">已处理文档</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-number" id="syncedCount">0</div>
+                    <div class="status-label">已同步文件</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-number" id="cdnCount">0</div>
+                    <div class="status-label">CDN替换</div>
+                </div>
+            </div>
+            
+            <div class="log-area" id="logArea">
+                <div>🎯 系统就绪，等待操作...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局状态管理
+        const state = {
+            uploadedFiles: [],
+            processedDocuments: [],
+            currentOperation: null,
+            stats: {
+                uploaded: 0,
+                processed: 0,
+                synced: 0,
+                cdn: 0
+            }
+        };
+
+        // DOM元素引用
+        const elements = {
+            handwritingUpload: document.getElementById('handwritingUpload'),
+            handwritingFiles: document.getElementById('handwritingFiles'),
+            handwritingFileList: document.getElementById('handwritingFileList'),
+            handwritingProgress: document.getElementById('handwritingProgress'),
+            processHandwriting: document.getElementById('processHandwriting'),
+            syncToGithub: document.getElementById('syncToGithub'),
+            listRepoFiles: document.getElementById('listRepoFiles'),
+            replaceCdnUrls: document.getElementById('replaceCdnUrls'),
+            oneClickProcess: document.getElementById('oneClickProcess'),
+            logArea: document.getElementById('logArea'),
+            repoUrl: document.getElementById('repoUrl'),
+            targetBranch: document.getElementById('targetBranch'),
+            localPath: document.getElementById('localPath'),
+            attachmentDir: document.getElementById('attachmentDir')
+        };
+
+        // 日志系统
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            logEntry.innerHTML = `<span style="color: #718096;">[${timestamp}]</span> ${icon} ${message}`;
+            elements.logArea.appendChild(logEntry);
+            elements.logArea.scrollTop = elements.logArea.scrollHeight;
+        }
+
+        // 更新统计数据
+        function updateStats() {
+            document.getElementById('uploadedCount').textContent = state.stats.uploaded;
+            document.getElementById('processedCount').textContent = state.stats.processed;
+            document.getElementById('syncedCount').textContent = state.stats.synced;
+            document.getElementById('cdnCount').textContent = state.stats.cdn;
+        }
+
+        // 文件上传处理
+        function setupFileUpload() {
+            // 拖拽上传
+            elements.handwritingUpload.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                elements.handwritingUpload.classList.add('dragover');
+            });
+
+            elements.handwritingUpload.addEventListener('dragleave', () => {
+                elements.handwritingUpload.classList.remove('dragover');
+            });
+
+            elements.handwritingUpload.addEventListener('drop', (e) => {
+                e.preventDefault();
+                elements.handwritingUpload.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            });
+
+            // 点击上传
+            elements.handwritingUpload.addEventListener('click', () => {
+                elements.handwritingFiles.click();
+            });
+
+            elements.handwritingFiles.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+        }
+
+        // 处理上传的文件
+        function handleFiles(files) {
+            const validFiles = Array.from(files).filter(file => {
+                const isImage = file.type.startsWith('image/');
+                const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB
+                
+                if (!isImage) {
+                    addLog(`文件 ${file.name} 不是有效的图片格式`, 'error');
+                    return false;
+                }
+                
+                if (!isValidSize) {
+                    addLog(`文件 ${file.name} 超过10MB大小限制`, 'error');
+                    return false;
+                }
+                
+                return true;
+            });
+
+            if (validFiles.length === 0) return;
+
+            state.uploadedFiles.push(...validFiles);
+            state.stats.uploaded += validFiles.length;
+            updateStats();
+            updateFileList();
+            elements.processHandwriting.disabled = false;
+            
+            addLog(`成功添加 ${validFiles.length} 个文件`, 'success');
+        }
+
+        // 更新文件列表显示
+        function updateFileList() {
+            elements.handwritingFileList.innerHTML = '';
+            
+            state.uploadedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+                    </div>
+                    <button onclick="removeFile(${index})" style="background: none; border: none; color: #e53e3e; cursor: pointer;">🗑️</button>
+                `;
+                elements.handwritingFileList.appendChild(fileItem);
+            });
+        }
+
+        // 移除文件
+        function removeFile(index) {
+            state.uploadedFiles.splice(index, 1);
+            state.stats.uploaded--;
+            updateStats();
+            updateFileList();
+            
+            if (state.uploadedFiles.length === 0) {
+                elements.processHandwriting.disabled = true;
+            }
+            
+            addLog('文件已移除', 'info');
+        }
+
+        // API调用辅助函数
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(endpoint, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                addLog(`API调用失败: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        // 手写图片OCR处理
+        async function processHandwritingImages() {
+            if (state.uploadedFiles.length === 0) return;
+            
+            const button = elements.processHandwriting;
+            const loading = button.querySelector('.loading');
+            
+            button.disabled = true;
+            loading.classList.remove('hidden');
+            elements.handwritingProgress.classList.remove('hidden');
+            
+            addLog('开始批量OCR处理...', 'info');
+            
+            try {
+                for (let i = 0; i < state.uploadedFiles.length; i++) {
+                    const file = state.uploadedFiles[i];
+                    addLog(`正在处理: ${file.name}`, 'info');
+                    
+                    // 转换为base64
+                    const base64 = await fileToBase64(file);
+                    
+                    // 调用OCR API
+                    const result = await apiCall('/api/ocr/recognize', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            base64Image: base64,
+                            options: {
+                                language: 'zh-CN',
+                                enhance: true
+                            }
+                        })
+                    });
+                    
+                    if (result.success) {
+                        state.processedDocuments.push({
+                            filename: file.name,
+                            content: result.data.text,
+                            originalFile: file
+                        });
+                        state.stats.processed++;
+                        addLog(`${file.name} 处理完成`, 'success');
+                    } else {
+                        addLog(`${file.name} 处理失败: ${result.error}`, 'error');
+                    }
+                    
+                    // 更新进度
+                    const progress = ((i + 1) / state.uploadedFiles.length) * 100;
+                    elements.handwritingProgress.querySelector('.progress-fill').style.width = `${progress}%`;
+                }
+                
+                updateStats();
+                elements.syncToGithub.disabled = false;
+                addLog('所有文件OCR处理完成', 'success');
+                
+            } catch (error) {
+                addLog(`OCR处理失败: ${error.message}`, 'error');
+            } finally {
+                button.disabled = false;
+                loading.classList.add('hidden');
+                elements.handwritingProgress.classList.add('hidden');
+            }
+        }
+
+        // 文件转base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // GitHub同步
+        async function syncToGithub() {
+            if (state.processedDocuments.length === 0) {
+                addLog('没有可同步的文档', 'warning');
+                return;
+            }
+            
+            const repoUrl = elements.repoUrl.value.trim();
+            const branch = elements.targetBranch.value.trim();
+            
+            if (!repoUrl) {
+                addLog('请输入GitHub仓库地址', 'error');
+                return;
+            }
+            
+            const button = elements.syncToGithub;
+            const loading = button.querySelector('.loading');
+            
+            button.disabled = true;
+            loading.classList.remove('hidden');
+            
+            addLog('开始同步到GitHub...', 'info');
+            
+            try {
+                // 这里调用GitHub同步API
+                const result = await apiCall('/api/github/sync', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        repoUrl,
+                        branch,
+                        documents: state.processedDocuments
+                    })
+                });
+                
+                if (result.success) {
+                    state.stats.synced += state.processedDocuments.length;
+                    updateStats();
+                    addLog('GitHub同步完成', 'success');
+                } else {
+                    addLog(`GitHub同步失败: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                addLog(`GitHub同步失败: ${error.message}`, 'error');
+            } finally {
+                button.disabled = false;
+                loading.classList.add('hidden');
+            }
+        }
+
+        // CDN URL替换
+        async function replaceCdnUrls() {
+            const localPath = elements.localPath.value.trim();
+            const attachmentDir = elements.attachmentDir.value.trim();
+            
+            if (!localPath) {
+                addLog('请输入本地路径', 'error');
+                return;
+            }
+            
+            const button = elements.replaceCdnUrls;
+            const loading = button.querySelector('.loading');
+            
+            button.disabled = true;
+            loading.classList.remove('hidden');
+            
+            addLog('开始CDN URL替换...', 'info');
+            
+            try {
+                const result = await apiCall('/api/cdn/replace', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        localPath,
+                        attachmentDir
+                    })
+                });
+                
+                if (result.success) {
+                    state.stats.cdn += result.data.replacedCount || 0;
+                    updateStats();
+                    addLog(`CDN替换完成，共替换 ${result.data.replacedCount} 个链接`, 'success');
+                } else {
+                    addLog(`CDN替换失败: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                addLog(`CDN替换失败: ${error.message}`, 'error');
+            } finally {
+                button.disabled = false;
+                loading.classList.add('hidden');
+            }
+        }
+
+        // 一键处理全流程
+        async function oneClickProcess() {
+            if (state.uploadedFiles.length === 0) {
+                addLog('请先上传手写图片', 'warning');
+                return;
+            }
+            
+            const button = elements.oneClickProcess;
+            const loading = button.querySelector('.loading');
+            
+            button.disabled = true;
+            loading.classList.remove('hidden');
+            
+            addLog('🚀 开始一键处理全流程...', 'info');
+            
+            try {
+                // 1. OCR处理
+                addLog('步骤 1/3: OCR识别处理', 'info');
+                await processHandwritingImages();
+                
+                // 2. CDN替换
+                if (elements.localPath.value.trim()) {
+                    addLog('步骤 2/3: CDN URL替换', 'info');
+                    await replaceCdnUrls();
+                }
+                
+                // 3. GitHub同步
+                if (elements.repoUrl.value.trim()) {
+                    addLog('步骤 3/3: GitHub同步', 'info');
+                    await syncToGithub();
+                }
+                
+                addLog('🎉 一键处理全流程完成！', 'success');
+                
+            } catch (error) {
+                addLog(`一键处理失败: ${error.message}`, 'error');
+            } finally {
+                button.disabled = false;
+                loading.classList.add('hidden');
+            }
+        }
+
+        // 查看仓库文件
+        async function listRepoFiles() {
+            const repoUrl = elements.repoUrl.value.trim();
+            
+            if (!repoUrl) {
+                addLog('请输入GitHub仓库地址', 'error');
+                return;
+            }
+            
+            addLog('正在获取仓库文件列表...', 'info');
+            
+            try {
+                const result = await apiCall('/api/github/files', {
+                    method: 'POST',
+                    body: JSON.stringify({ repoUrl })
+                });
+                
+                if (result.success) {
+                    addLog(`仓库文件列表 (共${result.data.files.length}个文件):`, 'info');
+                    result.data.files.forEach(file => {
+                        addLog(`📄 ${file.path}`, 'info');
+                    });
+                } else {
+                    addLog(`获取文件列表失败: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                addLog(`获取文件列表失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 事件监听器设置
+        function setupEventListeners() {
+            elements.processHandwriting.addEventListener('click', processHandwritingImages);
+            elements.syncToGithub.addEventListener('click', syncToGithub);
+            elements.listRepoFiles.addEventListener('click', listRepoFiles);
+            elements.replaceCdnUrls.addEventListener('click', replaceCdnUrls);
+            elements.oneClickProcess.addEventListener('click', oneClickProcess);
+        }
+
+        // 初始化
+        function init() {
+            setupFileUpload();
+            setupEventListeners();
+            updateStats();
+            addLog('智能上传中心已启动', 'success');
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+        
+        // 全局函数暴露
+        window.removeFile = removeFile;
+        
+        // 智能上传中心JavaScript功能实现
+        class UploadCenter {
+            constructor() {
+                this.apiBase = window.location.origin;
+                this.currentFiles = [];
+                this.processingResults = [];
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.updateStatus();
+            }
+
+            bindEvents() {
+                // 文件上传相关
+                const fileInput = document.getElementById('fileInput');
+                const uploadArea = document.getElementById('uploadArea');
+                const processBtn = document.getElementById('processImages');
+                const clearBtn = document.getElementById('clearFiles');
+
+                if (fileInput) fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+                if (uploadArea) {
+                    uploadArea.addEventListener('click', () => fileInput?.click());
+                    uploadArea.addEventListener('dragover', (e) => this.handleDragOver(e));
+                    uploadArea.addEventListener('drop', (e) => this.handleDrop(e));
+                }
+                if (processBtn) processBtn.addEventListener('click', () => this.processImages());
+                if (clearBtn) clearBtn.addEventListener('click', () => this.clearFiles());
+
+                // GitHub同步相关
+                const syncBtn = document.getElementById('syncToGithub');
+                const listBtn = document.getElementById('listRepoFiles');
+                if (syncBtn) syncBtn.addEventListener('click', () => this.syncToGithub());
+                if (listBtn) listBtn.addEventListener('click', () => this.listRepoFiles());
+
+                // CDN替换相关
+                const cdnBtn = document.getElementById('replaceCdnUrls');
+                if (cdnBtn) cdnBtn.addEventListener('click', () => this.replaceCdnUrls());
+
+                // 一键自动化
+                const autoBtn = document.getElementById('autoProcess');
+                if (autoBtn) autoBtn.addEventListener('click', () => this.autoProcess());
+            }
+
+            handleFileSelect(event) {
+                const files = Array.from(event.target.files);
+                this.addFiles(files);
+            }
+
+            handleDragOver(event) {
+                event.preventDefault();
+                event.currentTarget.classList.add('drag-over');
+            }
+
+            handleDrop(event) {
+                event.preventDefault();
+                event.currentTarget.classList.remove('drag-over');
+                const files = Array.from(event.dataTransfer.files);
+                this.addFiles(files.filter(file => file.type.startsWith('image/')));
+            }
+
+            addFiles(files) {
+                files.forEach(file => {
+                    if (file.type.startsWith('image/') && file.size <= 10 * 1024 * 1024) {
+                        this.currentFiles.push(file);
+                    }
+                });
+                this.updateFileList();
+            }
+
+            updateFileList() {
+                const fileList = document.getElementById('fileList');
+                if (fileList) {
+                    fileList.innerHTML = this.currentFiles.map((file, index) => `
+                        <div class="file-item">
+                            <span class="file-name">${file.name}</span>
+                            <span class="file-size">${(file.size / 1024).toFixed(1)} KB</span>
+                            <button onclick="uploadCenter.removeFile(${index})" class="remove-btn">×</button>
+                        </div>
+                    `).join('');
+                }
+                
+                const processBtn = document.getElementById('processImages');
+                if (processBtn) processBtn.disabled = this.currentFiles.length === 0;
+            }
+
+            removeFile(index) {
+                this.currentFiles.splice(index, 1);
+                this.updateFileList();
+            }
+
+            clearFiles() {
+                this.currentFiles = [];
+                this.processingResults = [];
+                this.updateFileList();
+                this.updateResults();
+            }
+
+            async processImages() {
+                if (this.currentFiles.length === 0) return;
+
+                this.showLoading('正在处理图片...');
+                
+                try {
+                    const formData = new FormData();
+                    this.currentFiles.forEach((file, index) => {
+                        formData.append(`images`, file);
+                    });
+                    formData.append('options', JSON.stringify({
+                        language: 'zh-cn',
+                        enhance: true,
+                        generateMarkdown: true
+                    }));
+
+                    const response = await fetch(`${this.apiBase}/api/batch-ocr/process`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    if (result.success) {
+                        this.processingResults = result.data.results;
+                        this.updateResults();
+                        this.showSuccess('图片处理完成！');
+                    } else {
+                        throw new Error(result.error || '处理失败');
+                    }
+                } catch (error) {
+                    console.error('Processing error:', error);
+                    this.showError(`处理失败: ${error.message}`);
+                } finally {
+                    this.hideLoading();
+                }
+            }
+
+            async syncToGithub() {
+                if (this.processingResults.length === 0) {
+                    this.showError('请先处理图片');
+                    return;
+                }
+
+                this.showLoading('正在同步到GitHub...');
+
+                try {
+                    const documents = this.processingResults.map(result => ({
+                        filename: `handwritten_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.md`,
+                        content: result.markdownContent,
+                        metadata: {
+                            originalImage: result.imageUrl,
+                            confidence: result.confidence,
+                            processedAt: new Date().toISOString()
+                        }
+                    }));
+
+                    const response = await fetch(`${this.apiBase}/api/github-sync/sync`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            documents,
+                            repoInfo: {
+                                owner: 'your-username',
+                                repo: 'your-repo',
+                                branch: 'main'
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    if (result.success) {
+                        this.showSuccess(`成功同步 ${result.data.summary.syncedCount} 个文件到GitHub`);
+                    } else {
+                        throw new Error(result.error || '同步失败');
+                    }
+                } catch (error) {
+                    console.error('GitHub sync error:', error);
+                    this.showError(`GitHub同步失败: ${error.message}`);
+                } finally {
+                    this.hideLoading();
+                }
+            }
+
+            async listRepoFiles() {
+                this.showLoading('正在获取仓库文件列表...');
+
+                try {
+                    const response = await fetch(`${this.apiBase}/api/github-sync/list`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            repoInfo: {
+                                owner: 'your-username',
+                                repo: 'your-repo',
+                                branch: 'main'
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    if (result.success) {
+                        this.displayRepoFiles(result.data.files);
+                    } else {
+                        throw new Error(result.error || '获取文件列表失败');
+                    }
+                } catch (error) {
+                    console.error('List files error:', error);
+                    this.showError(`获取文件列表失败: ${error.message}`);
+                } finally {
+                    this.hideLoading();
+                }
+            }
+
+            async replaceCdnUrls() {
+                if (this.processingResults.length === 0) {
+                    this.showError('请先处理图片');
+                    return;
+                }
+
+                this.showLoading('正在替换CDN URL...');
+
+                try {
+                    const documents = this.processingResults.map(result => ({
+                        content: result.markdownContent,
+                        filename: result.filename || 'untitled.md'
+                    }));
+
+                    const response = await fetch(`${this.apiBase}/api/cdn-replacement/batch-replace`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            documents,
+                            baseUrl: 'https://imagedelivery.net/your-account-id'
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    if (result.success) {
+                        result.data.documents.forEach((doc, index) => {
+                            if (this.processingResults[index]) {
+                                this.processingResults[index].markdownContent = doc.content;
+                            }
+                        });
+                        this.updateResults();
+                        this.showSuccess(`成功替换 ${result.data.summary.totalReplacements} 个URL`);
+                    } else {
+                        throw new Error(result.error || 'CDN URL替换失败');
+                    }
+                } catch (error) {
+                    console.error('CDN replacement error:', error);
+                    this.showError(`CDN URL替换失败: ${error.message}`);
+                } finally {
+                    this.hideLoading();
+                }
+            }
+
+            async autoProcess() {
+                if (this.currentFiles.length === 0) {
+                    this.showError('请先选择图片文件');
+                    return;
+                }
+
+                try {
+                    await this.processImages();
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    await this.replaceCdnUrls();
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    await this.syncToGithub();
+
+                    this.showSuccess('一键自动化处理完成！');
+                } catch (error) {
+                    console.error('Auto process error:', error);
+                    this.showError(`自动化处理失败: ${error.message}`);
+                }
+            }
+
+            updateResults() {
+                const resultsArea = document.getElementById('resultsArea');
+                if (!resultsArea) return;
+                
+                if (this.processingResults.length === 0) {
+                    resultsArea.innerHTML = '<p class="no-results">暂无处理结果</p>';
+                    return;
+                }
+
+                resultsArea.innerHTML = this.processingResults.map((result, index) => `
+                    <div class="result-item">
+                        <div class="result-header">
+                            <h4>图片 ${index + 1}</h4>
+                            <span class="confidence">置信度: ${(result.confidence * 100).toFixed(1)}%</span>
+                        </div>
+                        <div class="result-content">
+                            <div class="ocr-text">
+                                <h5>识别文本:</h5>
+                                <p>${result.text || '未识别到文字'}</p>
+                            </div>
+                            <div class="markdown-content">
+                                <h5>Markdown内容:</h5>
+                                <pre><code>${result.markdownContent || '无内容'}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            displayRepoFiles(files) {
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>仓库文件列表</h3>
+                            <button class="close-btn" onclick="this.parentElement.parentElement.parentElement.remove()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="file-tree">
+                                ${files.map(file => `
+                                    <div class="file-tree-item">
+                                        <span class="file-icon">${file.type === 'dir' ? '📁' : '📄'}</span>
+                                        <span class="file-name">${file.name}</span>
+                                        <span class="file-size">${file.size ? (file.size / 1024).toFixed(1) + ' KB' : ''}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            updateStatus() {
+                const statusElement = document.getElementById('systemStatus');
+                if (statusElement) {
+                    statusElement.textContent = '系统运行正常';
+                    statusElement.className = 'status-text status-success';
+                }
+            }
+
+            showLoading(message) {
+                const loading = document.getElementById('loadingIndicator');
+                if (loading) {
+                    loading.textContent = message;
+                    loading.style.display = 'block';
+                }
+            }
+
+            hideLoading() {
+                const loading = document.getElementById('loadingIndicator');
+                if (loading) loading.style.display = 'none';
+            }
+
+            showSuccess(message) {
+                this.showMessage(message, 'success');
+            }
+
+            showError(message) {
+                this.showMessage(message, 'error');
+            }
+
+            showMessage(message, type) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message message-${type}`;
+                messageDiv.textContent = message;
+                messageDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    color: white;
+                    font-weight: 500;
+                    z-index: 10000;
+                    background: ${type === 'success' ? '#48bb78' : '#f56565'};
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                `;
+                document.body.appendChild(messageDiv);
+                
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 5000);
+            }
+        }
+
+        // 初始化上传中心
+        const uploadCenter = new UploadCenter();
+        console.log('智能上传中心已加载');
+    </script>
+</body>
+</html>

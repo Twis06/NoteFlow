@@ -1,0 +1,10 @@
+{
+  "id": "cf-images-uploader",
+  "name": "Cloudflare Images Uploader",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "自动将粘贴/拖拽的图片上传到 Cloudflare Images 并替换为外链",
+  "author": "note-bot",
+  "authorUrl": "",
+  "isDesktopOnly": true
+}

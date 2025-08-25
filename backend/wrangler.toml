@@ -1,0 +1,25 @@
+name = "note-worker"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+# 将hono相关包标记为外部依赖，避免打包错误
+[build]
+[build.external]
+packages = ["hono", "hono/cors", "hono/jwt", "hono/streaming"]
+
+[vars]
+TIMEZONE = "Asia/Shanghai"
+AGGREGATION_WINDOW_SECONDS = 90
+
+[observability]
+enabled = true
+
+# KV配置暂时注释掉，用于本地开发
+# [[kv_namespaces]]
+# binding = "NOTE_SESSIONS"
+# id = "__REPLACE_WITH_KV_ID__"
+
+# 路由配置暂时注释掉，用于本地开发
+# [[routes]]
+# pattern = "*/*"
+# zone_name = "example.com"

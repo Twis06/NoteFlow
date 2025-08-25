@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手写OCR演示 - AI辅助笔记系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #e0e6ed;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            margin-bottom: 30px;
+        }
+        
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-2px);
+        }
+        
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #e3f2fd;
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+        
+        .upload-text {
+            font-size: 1.2em;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .preview-section {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result-section {
+            margin: 30px 0;
+        }
+        
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        
+        .result-text {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            min-height: 100px;
+        }
+        
+        .result-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        
+        .info-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .provider-info-section {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .provider-info {
+            display: inline-block;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px 20px;
+        }
+        
+        .provider-name {
+            font-weight: 600;
+            color: #495057;
+            margin-right: 10px;
+        }
+        
+        .provider-desc {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .upload-area {
+                padding: 40px 15px;
+            }
+            
+            .result-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖋️ 手写OCR演示</h1>
+            <p>上传手写图片，体验AI文字识别的强大功能</p>
+        </div>
+        
+        <div class="content">
+            <!-- OCR服务商信息 -->
+            <div class="provider-info-section">
+                <div class="provider-info">
+                    <span class="provider-name">SiliconFlow GLM-4.5V</span>
+                    <span class="provider-desc">高精度多模态手写识别</span>
+                </div>
+            </div>
+            
+            <!-- 文件上传区域 -->
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">点击选择图片或拖拽到此处</div>
+                <div class="upload-hint">支持 JPG、PNG、GIF、WEBP 格式，最大5MB</div>
+            </div>
+            
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            
+            <!-- 图片预览 -->
+            <div class="preview-section" id="previewSection" style="display: none;">
+                <h3>📸 图片预览</h3>
+                <div id="imagePreview"></div>
+            </div>
+            
+            <!-- 加载状态 -->
+            <div class="loading" id="loadingSection">
+                <div class="loading-spinner"></div>
+                <div>🤖 AI正在识别中，请稍候...</div>
+            </div>
+            
+            <!-- 识别结果 -->
+            <div class="result-section" id="resultSection" style="display: none;">
+                <div class="result-card">
+                    <h3>✨ 识别结果</h3>
+                    <div class="result-text" id="resultText"></div>
+                    
+                    <div class="result-info" id="resultInfo"></div>
+                    
+                    <div style="text-align: center;">
+                        <button class="btn" onclick="copyToClipboard()">📋 复制文本</button>
+                        <button class="btn" onclick="downloadResult()">💾 下载结果</button>
+                        <button class="btn" onclick="resetDemo()">🔄 重新识别</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 错误信息 -->
+            <div id="errorSection" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentResult = null;
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            
+            // 点击上传
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            // 文件选择
+            fileInput.addEventListener('change', (e) => {
+                handleFile(e.target.files[0]);
+            });
+            
+            // 拖拽上传
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file) handleFile(file);
+            });
+        });
+        
+        /**
+         * 处理文件上传
+         */
+        async function handleFile(file) {
+            if (!file) return;
+            
+            // 验证文件
+            if (!file.type.startsWith('image/')) {
+                showError('请选择图片文件！');
+                return;
+            }
+            
+            if (file.size > 5 * 1024 * 1024) {
+                showError('图片文件不能超过5MB！');
+                return;
+            }
+            
+            try {
+                hideError();
+                hideResult();
+                
+                // 显示预览
+                await showPreview(file);
+                
+                // 转换为Base64
+                const base64DataUrl = await fileToBase64(file);
+                // 移除data URL前缀，只保留base64数据
+                const base64 = base64DataUrl.split(',')[1];
+                
+                // 执行OCR
+                await performOCR(base64);
+            } catch (error) {
+                console.error('处理文件失败:', error);
+                showError(`处理失败: ${error.message}`);
+            }
+        }
+        
+        /**
+         * 显示图片预览
+         */
+        function showPreview(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const previewSection = document.getElementById('previewSection');
+                    const imagePreview = document.getElementById('imagePreview');
+                    
+                    imagePreview.innerHTML = `<img src="${e.target.result}" class="preview-image" alt="预览图片">`;
+                    previewSection.style.display = 'block';
+                    
+                    // 滚动到预览区域
+                    previewSection.scrollIntoView({ behavior: 'smooth' });
+                    resolve();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        /**
+         * 文件转Base64
+         */
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        /**
+         * 执行OCR识别
+         */
+        async function performOCR(base64Image) {
+            const loadingSection = document.getElementById('loadingSection');
+            // 使用SiliconFlow GLM-4.5V模型
+            const provider = 'siliconflow';
+            
+            try {
+                // 显示加载状态
+                loadingSection.style.display = 'block';
+                loadingSection.scrollIntoView({ behavior: 'smooth' });
+                
+                const startTime = Date.now();
+                
+                // 调用OCR API
+                const response = await fetch('/api/ocr/recognize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        image: base64Image,
+                        options: {
+                            language: 'zh-CN',
+                            enhance: true
+                        }
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const endTime = Date.now();
+                
+                if (data.success) {
+                    currentResult = {
+                        ...data.data,
+                        actualProcessTime: endTime - startTime
+                    };
+                    showResult(currentResult);
+                } else {
+                    throw new Error(data.error || '识别失败');
+                }
+            } catch (error) {
+                console.error('OCR识别失败:', error);
+                showError(`识别失败: ${error.message}`);
+            } finally {
+                loadingSection.style.display = 'none';
+            }
+        }
+        
+        /**
+         * 显示识别结果
+         */
+        function showResult(data) {
+            const resultSection = document.getElementById('resultSection');
+            const resultText = document.getElementById('resultText');
+            const resultInfo = document.getElementById('resultInfo');
+            
+            // 显示识别文本
+            resultText.textContent = data.text || '未识别到文字内容';
+            
+            // 显示统计信息
+            resultInfo.innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">置信度</div>
+                    <div class="info-value">${(data.confidence * 100).toFixed(1)}%</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">服务商</div>
+                    <div class="info-value">SiliconFlow GLM-4.5V</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">处理时间</div>
+                    <div class="info-value">${data.actualProcessTime}ms</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">识别词数</div>
+                    <div class="info-value">${data.words ? data.words.length : 0}</div>
+                </div>
+            `;
+            
+            resultSection.style.display = 'block';
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        /**
+         * 显示错误信息
+         */
+        function showError(message) {
+            const errorSection = document.getElementById('errorSection');
+            errorSection.innerHTML = `<div class="error"><strong>❌ 错误:</strong> ${message}</div>`;
+            errorSection.style.display = 'block';
+            errorSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        /**
+         * 隐藏错误信息
+         */
+        function hideError() {
+            document.getElementById('errorSection').style.display = 'none';
+        }
+        
+        /**
+         * 隐藏结果
+         */
+        function hideResult() {
+            document.getElementById('resultSection').style.display = 'none';
+        }
+        
+        /**
+         * 复制文本到剪贴板
+         */
+        async function copyToClipboard() {
+            if (!currentResult || !currentResult.text) {
+                showError('没有可复制的文本');
+                return;
+            }
+            
+            try {
+                await navigator.clipboard.writeText(currentResult.text);
+                showSuccess('✅ 文本已复制到剪贴板！');
+            } catch (error) {
+                console.error('复制失败:', error);
+                // 降级方案
+                const textArea = document.createElement('textarea');
+                textArea.value = currentResult.text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showSuccess('✅ 文本已复制到剪贴板！');
+            }
+        }
+        
+        /**
+         * 下载识别结果
+         */
+        function downloadResult() {
+            if (!currentResult) {
+                showError('没有可下载的结果');
+                return;
+            }
+            
+            const content = `手写OCR识别结果\n\n识别文本:\n${currentResult.text}\n\n统计信息:\n- 置信度: ${(currentResult.confidence * 100).toFixed(1)}%\n- 服务商: ${currentResult.provider}\n- 处理时间: ${currentResult.actualProcessTime}ms\n- 识别词数: ${currentResult.words ? currentResult.words.length : 0}\n\n生成时间: ${new Date().toLocaleString()}`;
+            
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `OCR结果_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showSuccess('✅ 结果已下载！');
+        }
+        
+        /**
+         * 重置演示
+         */
+        function resetDemo() {
+            document.getElementById('previewSection').style.display = 'none';
+            document.getElementById('resultSection').style.display = 'none';
+            document.getElementById('loadingSection').style.display = 'none';
+            hideError();
+            document.getElementById('fileInput').value = '';
+            currentResult = null;
+            
+            // 滚动到顶部
+            document.querySelector('.upload-area').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        /**
+         * 显示成功信息
+         */
+        function showSuccess(message) {
+            const errorSection = document.getElementById('errorSection');
+            errorSection.innerHTML = `<div class="success">${message}</div>`;
+            errorSection.style.display = 'block';
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                errorSection.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

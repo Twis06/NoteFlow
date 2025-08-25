@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双通道图片处理系统 - Twis06/notes</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">
+                    <span class="icon">📝</span>
+                    双通道图片处理系统
+                </h1>
+                <div class="repo-info">
+                    <span class="repo-name">Twis06/notes</span>
+                    <div class="status-indicator" id="repoStatus">
+                        <span class="status-dot"></span>
+                        <span class="status-text">连接中...</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要内容区域 -->
+        <main class="main-content">
+            <!-- 快速操作面板 -->
+            <section class="quick-actions">
+                <div class="action-card upload-card">
+                    <h2>📷 手写笔记上传</h2>
+                    <p>支持多文件上传，自动OCR识别并转换为Markdown</p>
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-placeholder">
+                            <div class="upload-icon">📁</div>
+                            <div class="upload-text">
+                                <strong>点击选择文件或拖拽到此处</strong>
+                                <br>
+                                <small>支持 JPG, PNG, WebP 格式，最大 10MB</small>
+                            </div>
+                        </div>
+                        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+                    </div>
+                    <div class="upload-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="autoCommit" checked>
+                            <span class="checkmark"></span>
+                            自动提交到GitHub
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="generateMarkdown" checked>
+                            <span class="checkmark"></span>
+                            生成Markdown格式
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="optimizeImage" checked>
+                            <span class="checkmark"></span>
+                            图片优化压缩
+                        </label>
+                    </div>
+                </div>
+
+                <div class="action-card status-card">
+                    <h2>📊 仓库状态</h2>
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <span class="status-label">最后同步</span>
+                            <span class="status-value" id="lastSync">--</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">处理文件数</span>
+                            <span class="status-value" id="processedFiles">--</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">待处理队列</span>
+                            <span class="status-value" id="pendingQueue">--</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">存储使用</span>
+                            <span class="status-value" id="storageUsed">--</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" id="refreshStatus">🔄 刷新状态</button>
+                </div>
+            </section>
+
+            <!-- 处理进度区域 -->
+            <section class="processing-section" id="processingSection" style="display: none;">
+                <h2>🔄 处理进度</h2>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">准备中...</div>
+                </div>
+                <div class="file-list" id="fileList"></div>
+            </section>
+
+            <!-- 结果展示区域 -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <h2>✅ 处理结果</h2>
+                <div class="results-container" id="resultsContainer"></div>
+            </section>
+
+            <!-- 操作记录 -->
+            <section class="history-section">
+                <h2>📋 最近操作记录</h2>
+                <div class="history-container" id="historyContainer">
+                    <div class="history-placeholder">
+                        <p>暂无操作记录</p>
+                        <small>上传文件后将显示处理历史</small>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" id="loadMoreHistory">加载更多</button>
+            </section>
+        </main>
+
+        <!-- 底部信息 -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="/gallery" class="footer-link">📸 图片库</a>
+                    <a href="/api/handwritten/stats" class="footer-link">📊 API状态</a>
+                    <a href="https://github.com/Twis06/notes" target="_blank" class="footer-link">🔗 GitHub仓库</a>
+                </div>
+                <div class="footer-info">
+                    <span>双通道图片处理系统 v1.0</span>
+                    <span>•</span>
+                    <span id="systemStatus">系统正常</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 通知组件 -->
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <!-- 模态框 -->
+    <div class="modal" id="previewModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>预览结果</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modalCancel">取消</button>
+                <button class="btn btn-primary" id="modalConfirm">确认保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
