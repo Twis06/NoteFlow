@@ -375,10 +375,10 @@
 
         <div class="main-content">
             <div id="config-alert" class="config-section" style="display: none;">
-                <h3>⚙️ 环境配置状态</h3>
+                <h3>环境配置状态</h3>
                 <div id="config-items"></div>
                 <div class="alert alert-warning" style="margin-top: 15px;">
-                    <span>⚠️</span>
+                    <span>⚠</span>
                     <div>
                         <strong>配置提示：</strong>请在 <code>.env</code> 文件中设置真实的API密钥以启用完整功能。
                         <br>当前使用的是测试配置，某些功能可能无法正常工作。
@@ -388,16 +388,16 @@
 
             <div class="action-bar">
                 <button class="btn btn-primary" onclick="refreshData()">
-                    <span>🔄</span> 刷新数据
+                    <span>↻</span> 刷新数据
                 </button>
                 <button class="btn btn-success" onclick="performBatchReplace()">
-                    <span>🔄</span> 本地笔记同步&上云
+                    <span>↻</span> 本地笔记同步&上云
                 </button>
                 <button class="btn btn-warning" onclick="cleanGallery()">
                     <span>🧹</span> 清理图库
                 </button>
                 <button class="btn btn-info" onclick="window.open('handwriting-archive.html', '_blank')">
-                    <span>✍️</span> 手写识别
+                    <span>✍</span> 手写识别
                 </button>
                 <button class="btn btn-info" onclick="exportGallery()">
                     <span>📊</span> 导出数据
@@ -567,19 +567,19 @@
                 <div class="config-item">
                     <span>Cloudflare Images API</span>
                     <span class="config-status ${environment.cloudflare_configured ? 'configured' : 'needs-config'}">
-                        ${environment.cloudflare_configured ? '✅ 已配置' : '❌ 需要配置'}
+                        ${environment.cloudflare_configured ? '已配置' : '需要配置'}
                     </span>
                 </div>
                 <div class="config-item">
                     <span>GitHub API</span>
                     <span class="config-status ${environment.github_configured ? 'configured' : 'needs-config'}">
-                        ${environment.github_configured ? '✅ 已配置' : '❌ 需要配置'}
+                        ${environment.github_configured ? '已配置' : '需要配置'}
                     </span>
                 </div>
                 <div class="config-item">
                     <span>OCR API</span>
                     <span class="config-status ${environment.ocr_configured ? 'configured' : 'needs-config'}">
-                        ${environment.ocr_configured ? '✅ 已配置' : '❌ 需要配置'}
+                        ${environment.ocr_configured ? '已配置' : '需要配置'}
                     </span>
                 </div>
             `;
@@ -602,7 +602,7 @@
                     // 显示配置提示
                     container.innerHTML = `
                         <div class="alert alert-warning">
-                            <span>⚠️</span>
+                            <span>⚠</span>
                             <div>
                                 <strong>Cloudflare Images未配置</strong><br>
                                 ${result.error}<br>
@@ -615,7 +615,7 @@
                     if (result.mockData && result.mockData.images) {
                         const mockImagesHtml = result.mockData.images.map(image => `
                             <div class="image-card">
-                                <div class="image-placeholder">🖼️</div>
+                                <div class="image-placeholder">🖼</div>
                                 <div class="image-info">
                                     <div class="filename">${image.filename}</div>
                                     <div>大小: ${formatFileSize(image.size)}</div>
@@ -641,14 +641,14 @@
                     if (result.images.length === 0) {
                         container.innerHTML = `
                             <div class="alert alert-info">
-                                <span>ℹ️</span>
+                                <span>ℹ</span>
                                 <div>暂无图片，请先上传一些图片到Cloudflare Images</div>
                             </div>
                         `;
                     } else {
                         const imagesHtml = result.images.map(image => `
                             <div class="image-card">
-                                <div class="image-placeholder">🖼️</div>
+                                <div class="image-placeholder">🖼</div>
                                 <div class="image-info">
                                     <div class="filename">${image.filename}</div>
                                     <div>大小: ${formatFileSize(image.size)}</div>
@@ -672,7 +672,7 @@
                 console.error('加载图片库失败:', error);
                 document.getElementById('images-container').innerHTML = `
                     <div class="alert alert-warning">
-                        <span>⚠️</span>
+                        <span>⚠</span>
                         <div>加载图片库失败: ${error.message}</div>
                     </div>
                 `;
@@ -772,9 +772,9 @@
                     // 显示GitHub同步状态
                     if (result.githubSync) {
                         if (result.githubSync.success) {
-                            message += `\n✅ GitHub同步成功: ${result.githubSync.message}`;
+                            message += `\n GitHub同步成功: ${result.githubSync.message}`;
                         } else {
-                            message += `\n⚠️ GitHub同步失败: ${result.githubSync.error}`;
+                            message += `\n GitHub同步失败: ${result.githubSync.error}`;
                         }
                     }
                     
@@ -882,7 +882,7 @@
             notification.style.maxWidth = '400px';
             notification.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
             
-            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            const icon = type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ';
             notification.innerHTML = `<span>${icon}</span><div>${message}</div>`;
             
             document.body.appendChild(notification);
@@ -907,10 +907,10 @@
                     loadReplacementHistory()
                 ]);
                 
-                console.log('✅ 页面初始化完成');
+                console.log('页面初始化完成');
                 
             } catch (error) {
-                console.error('❌ 页面初始化失败:', error);
+                console.error('页面初始化失败:', error);
                 showNotification('页面初始化失败，请检查API服务器是否正常运行', 'error');
             }
         }

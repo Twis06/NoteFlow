@@ -9,9 +9,9 @@
 ## 当前状态
 
 ### 已启动的服务
-- ✅ 模拟服务器: `http://localhost:3000` (simple-server.cjs)
-- ✅ 真实API服务器: `http://localhost:8788` (real-server.cjs)
-- ✅ 前端服务: `http://localhost:8080`
+- 模拟服务器: `http://localhost:3000` (simple-server.cjs)
+- 真实API服务器: `http://localhost:8788` (real-server.cjs)
+- 前端服务: `http://localhost:8080`
 
 ### 前端页面
 - **模拟版本**: `http://localhost:8080/gallery.html` (连接模拟服务器)

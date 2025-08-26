@@ -111,11 +111,11 @@ lsof -ti:8080 | xargs kill -9
 
 ## Need Help?
 
-- 📚 Check the [documentation](./)
-- 🐛 Report issues on [GitHub Issues](https://github.com/yourusername/handwriting-ocr-archive/issues)
-- 💬 Join discussions on [GitHub Discussions](https://github.com/yourusername/handwriting-ocr-archive/discussions)
+- Check the [documentation](./)
+- Report issues on [GitHub Issues](https://github.com/yourusername/handwriting-ocr-archive/issues)
+- Join discussions on [GitHub Discussions](https://github.com/yourusername/handwriting-ocr-archive/discussions)
 
-## 🚀 5分钟快速上手
+## 5分钟快速上手
 
 ### 1. 基础HTML页面
 
@@ -140,17 +140,17 @@ lsof -ti:8080 | xargs kill -9
     </style>
 </head>
 <body>
-    <h1>📝 手写文字识别</h1>
+    <h1>手写文字识别</h1>
     
     <div class="upload-box" onclick="document.getElementById('file').click()">
-        📷 点击选择图片或拖拽到此处
+        点击选择图片或拖拽到此处
         <br><small>支持 JPG、PNG、GIF、WEBP 格式</small>
     </div>
     
     <input type="file" id="file" accept="image/*" style="display:none">
     
     <div id="preview" class="preview"></div>
-    <div id="loading" class="loading" style="display:none">🔄 正在识别中...</div>
+    <div id="loading" class="loading" style="display:none">正在识别中...</div>
     <div id="result" class="result" style="display:none"></div>
 
     <script>
@@ -221,17 +221,17 @@ lsof -ti:8080 | xargs kill -9
                 
                 if (data.success) {
                     result.innerHTML = `
-                        <h3>✅ 识别结果</h3>
+                        <h3>识别结果</h3>
                         <div style="background:white; padding:15px; border-radius:4px; margin:10px 0; white-space:pre-wrap;">${data.data.text || '未识别到文字'}</div>
                         <p><strong>置信度:</strong> ${(data.data.confidence * 100).toFixed(1)}% | <strong>用时:</strong> ${data.data.processTime}ms</p>
-                        <button onclick="copyText('${data.data.text.replace(/'/g, "\\'")}')">📋 复制文本</button>
+                        <button onclick="copyText('${data.data.text.replace(/'/g, "\\'")}')">复制文本</button>
                     `;
                     result.style.display = 'block';
                 } else {
                     throw new Error(data.message || '识别失败');
                 }
             } catch (error) {
-                result.innerHTML = `<div style="color:red;">❌ 识别失败: ${error.message}</div>`;
+                result.innerHTML = `<div style="color:red;">识别失败: ${error.message}</div>`;
                 result.style.display = 'block';
             } finally {
                 loading.style.display = 'none';
@@ -242,7 +242,7 @@ lsof -ti:8080 | xargs kill -9
         async function copyText(text) {
             try {
                 await navigator.clipboard.writeText(text);
-                alert('✅ 文本已复制到剪贴板！');
+                alert('文本已复制到剪贴板！');
             } catch (error) {
                 console.error('复制失败:', error);
             }
@@ -342,7 +342,7 @@ document.getElementById('ocrInput').onchange = async function(e) {
 </script>
 ```
 
-## 📱 移动端优化
+## 移动端优化
 
 在移动设备上使用时，添加以下CSS和JavaScript优化：
 
@@ -368,7 +368,7 @@ function openCamera() {
 }
 ```
 
-## 🔧 常见问题
+## 常见问题
 
 **Q: 识别准确率不高怎么办？**
 A: 确保图片清晰、文字与背景对比度高，可以尝试不同的OCR服务商。
@@ -385,7 +385,7 @@ A: 可以，将 `language` 参数设置为 `en` 即可。
 **Q: 如何提高识别速度？**
 A: 可以在前端压缩图片，或者选择响应更快的OCR服务商。
 
-## 🎯 下一步
+## 下一步
 
 - 查看完整文档: [HANDWRITING_OCR_GUIDE.md](./HANDWRITING_OCR_GUIDE.md)
 - 了解API详情: [API_USAGE.md](./API_USAGE.md)
@@ -393,4 +393,4 @@ A: 可以在前端压缩图片，或者选择响应更快的OCR服务商。
 
 ---
 
-*🎉 现在你已经可以开始使用手写OCR功能了！*
+*现在你已经可以开始使用手写OCR功能了！*

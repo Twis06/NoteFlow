@@ -319,9 +319,9 @@ class ImageProcessingApp {
             <div class="result-header">
                 <div class="result-title">📷 ${file.name}</div>
                 <div class="result-actions">
-                    ${githubUrl ? `<a href="${githubUrl}" target="_blank" class="btn btn-secondary">📂 查看GitHub</a>` : ''}
+                    ${githubUrl ? `<a href="${githubUrl}" target="_blank" class="btn btn-secondary">查看GitHub</a>` : ''}
                     <button class="btn btn-primary" onclick="app.previewResult('${file.name}', \`${markdownContent.replace(/`/g, '\\`')}\`)">
-                        👁️ 预览
+                        预览
                     </button>
                 </div>
             </div>
@@ -348,7 +348,7 @@ class ImageProcessingApp {
         const modalBody = document.getElementById('modalBody');
         
         modalBody.innerHTML = `
-            <h4>📄 ${fileName} - Markdown内容</h4>
+            <h4>${fileName} - Markdown内容</h4>
             <div class="result-content" style="max-height: 400px;">${this.escapeHtml(markdownContent)}</div>
         `;
         
@@ -516,7 +516,7 @@ class ImageProcessingApp {
                 <div class="history-details">${details}</div>
             </div>
             <div class="history-status">
-                ${file.success ? '✅' : '❌'}
+                ${file.success ? '✓' : '✗'}
             </div>
         `;
         

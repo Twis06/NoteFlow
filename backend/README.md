@@ -4,15 +4,15 @@
 
 ## 功能特点
 
-- 📱 **多平台输入**: Telegram Bot 接收手机图片
-- 🤖 **智能OCR**: GLM-4.5/GLM-4V 多模态识别手写内容
-- 🖋️ **手写OCR**: 支持百度、腾讯等多个OCR服务商的手写文字识别
-- 📐 **LaTeX支持**: 自动识别数学公式并转换为 LaTeX 格式
-- 🌐 **图床集成**: Cloudflare Images 提供全球CDN加速
-- 📝 **Obsidian同步**: 自动提交到Git仓库，Obsidian实时同步
-- 🔄 **会话聚合**: 连续发送的图片自动合并为一篇笔记
-- 🖼️ **本地图片上传**: Obsidian插件自动上传本地图片到图床
-- 📂 **批量处理**: 支持本地Obsidian笔记库的批量图片上传和链接更新
+- **多平台输入**: Telegram Bot 接收手机图片
+- **智能OCR**: GLM-4.5/GLM-4V 多模态识别手写内容
+- **手写OCR**: 支持百度、腾讯等多个OCR服务商的手写文字识别
+- **LaTeX支持**: 自动识别数学公式并转换为 LaTeX 格式
+- **图床集成**: Cloudflare Images 提供全球CDN加速
+- **Obsidian同步**: 自动提交到Git仓库，Obsidian实时同步
+- **会话聚合**: 连续发送的图片自动合并为一篇笔记
+- **本地图片上传**: Obsidian插件自动上传本地图片到图床
+- **批量处理**: 支持本地Obsidian笔记库的批量图片上传和链接更新
 
 ## 架构设计
 
@@ -104,10 +104,10 @@ node process_local_obsidian.js
 ## 文档指南
 
 - 📖 **[快速开始](docs/QUICK_START.md)** - 5分钟上手手写OCR功能
-- 📚 **[完整使用指南](docs/HANDWRITING_OCR_GUIDE.md)** - 详细的API文档和前端集成示例
-- ⚙️ **[环境配置](docs/SETUP.md)** - 详细的部署和配置说明
-- 🔧 **[API文档](docs/API_USAGE.md)** - 完整的API接口说明
-- 📋 **[任务清单](docs/TASKS.md)** - 开发进度和待办事项
+- **[完整使用指南](docs/HANDWRITING_OCR_GUIDE.md)** - 详细的API文档和前端集成示例
+- **[环境配置](docs/SETUP.md)** - 详细的部署和配置说明
+- **[API文档](docs/API_USAGE.md)** - 完整的API接口说明
+- **[任务清单](docs/TASKS.md)** - 开发进度和待办事项
 
 ## 配置说明
 

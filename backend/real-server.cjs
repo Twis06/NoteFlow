@@ -1280,12 +1280,12 @@ class RealAPIServer {
         this.server.listen(this.port, () => {
             console.log(`\n服务器已启动`);
             console.log(`📡 监听端口: ${this.port}`);
-            console.log(`🌐 API地址: http://localhost:${this.port}`);
-            console.log(`📊 状态检查: http://localhost:${this.port}/api/stats`);
-            console.log(`\n🔧 环境配置状态:`);
-            console.log(`   Cloudflare Images: ${process.env.CLOUDFLARE_IMAGES_API_TOKEN !== 'test_api_token' ? '✅ 已配置' : '❌ 需要配置'}`);
-            console.log(`   GitHub API: ${process.env.GITHUB_TOKEN !== 'test_token' ? '✅ 已配置' : '❌ 需要配置'}`);
-            console.log(`   OCR API: ${process.env.GLM_API_KEY !== 'test_key' ? '✅ 已配置' : '❌ 需要配置'}`);
+            console.log(`API地址: http://localhost:${this.port}`);
+        console.log(`状态检查: http://localhost:${this.port}/api/stats`);
+        console.log(`\n环境配置状态:`);
+        console.log(`   Cloudflare Images: ${process.env.CLOUDFLARE_IMAGES_API_TOKEN !== 'test_api_token' ? '已配置' : '需要配置'}`);
+        console.log(`   GitHub API: ${process.env.GITHUB_TOKEN !== 'test_token' ? '已配置' : '需要配置'}`);
+        console.log(`   OCR API: ${process.env.GLM_API_KEY !== 'test_key' ? '已配置' : '需要配置'}`);
             console.log(`\n按 Ctrl+C 停止服务器\n`);
         });
 

@@ -68,19 +68,19 @@ export default {
                 <h2>快速操作</h2>
                 <div class="action-grid">
                     <button class="action-btn" id="refreshStatus">
-                        <span class="icon">🔄</span>
+                        <span class="icon">↻</span>
                         <span>刷新状态</span>
                     </button>
                     <button class="action-btn" id="viewGallery">
-                        <span class="icon">🖼️</span>
+                        <span class="icon">🖼</span>
                         <span>查看相册</span>
                     </button>
                     <button class="action-btn" id="syncRepo">
-                        <span class="icon">🔄</span>
+                        <span class="icon">↻</span>
                         <span>同步仓库</span>
                     </button>
                     <button class="action-btn" id="clearHistory">
-                        <span class="icon">🗑️</span>
+                        <span class="icon">🗑</span>
                         <span>清空历史</span>
                     </button>
                 </div>
@@ -91,7 +91,7 @@ export default {
                 <h2>图片上传处理</h2>
                 <div class="upload-area" id="uploadArea">
                     <div class="upload-content">
-                        <div class="upload-icon">📁</div>
+                        <div class="upload-icon">📂</div>
                         <p class="upload-text">拖拽图片到此处或点击选择文件</p>
                         <p class="upload-hint">支持 JPG、PNG、GIF 格式，单个文件最大 10MB</p>
                         <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
@@ -2058,7 +2058,7 @@ async function getDemoHTML(): Promise<string> {
 <body>
     <div class="container">
         <div class="header">
-            <h1>🖋️ 手写OCR演示</h1>
+            <h1>手写OCR演示</h1>
             <p>AI辅助笔记系统 - 智能识别手写文字</p>
         </div>
         <div class="content">
@@ -2075,7 +2075,7 @@ async function getDemoHTML(): Promise<string> {
                         <span>🔍</span> 开始识别
                     </button>
                     <button class="btn btn-secondary" id="clearBtn">
-                        <span>🗑️</span> 重新选择
+                        <span>🗑</span> 重新选择
                     </button>
                 </div>
             </div>

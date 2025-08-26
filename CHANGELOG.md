@@ -8,19 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2024-01-XX
 
 ### Added
-- 🎉 **Initial Release** - Complete handwriting OCR archive system
-- 🔍 **Advanced OCR Processing** - Powered by GLM-4.5V for accurate handwriting recognition
-- 📝 **Batch Processing** - Upload and process multiple images simultaneously
-- 🔄 **GitHub Integration** - Automatic saving and version control
-- 📊 **Smart Formatting** - Auto-converts OCR results to structured Markdown
-- 🌐 **Web Interface** - Modern, responsive user interface with two main components:
+- **Initial Release** - Complete handwriting OCR archive system
+- **Advanced OCR Processing** - Powered by GLM-4.5V for accurate handwriting recognition
+- **Batch Processing** - Upload and process multiple images simultaneously
+- **GitHub Integration** - Automatic saving and version control
+- **Smart Formatting** - Auto-converts OCR results to structured Markdown
+- **Web Interface** - Modern, responsive user interface with two main components:
   - Admin Dashboard for system management
   - Handwriting Archive interface for OCR processing
-- ⚡ **Real-time Processing** - Live preview and editing capabilities
-- 🛡️ **Smart Conflict Resolution** - Automatic branch creation for version conflicts
-- 📚 **Comprehensive Documentation** - Complete setup and usage guides
-- 🔧 **Easy Configuration** - Environment-based configuration system
-- 🚀 **Quick Start** - One-command startup script
+- **Real-time Processing** - Live preview and editing capabilities
+- **Smart Conflict Resolution** - Automatic branch creation for version conflicts
+- **Comprehensive Documentation** - Complete setup and usage guides
+- **Easy Configuration** - Environment-based configuration system
+- **Quick Start** - One-command startup script
 
 ### Technical Features
 - **Backend**: Node.js/TypeScript server with modular architecture
