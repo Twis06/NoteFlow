@@ -1,4 +1,119 @@
-# 手写OCR快速开始指南
+# Quick Start Guide
+
+Get up and running with the Handwriting OCR Archive System in minutes.
+
+## Prerequisites
+
+- Node.js 18 or higher
+- Python 3.7+ (for static file serving)
+- Git (for repository management)
+- A text editor or IDE
+
+## Required API Keys
+
+Before starting, you'll need:
+
+1. **SiliconFlow API Key**: Sign up at [SiliconFlow Platform](https://siliconflow.cn/)
+2. **GitHub Personal Access Token**: Create one with `repo` permissions
+3. **Cloudflare API Token** (Optional): For advanced image management
+
+## Installation Steps
+
+### 1. Clone and Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/handwriting-ocr-archive.git
+cd handwriting-ocr-archive
+
+# Install backend dependencies
+cd backend
+npm install
+```
+
+### 2. Configure Environment
+
+```bash
+# Copy environment template
+cp ../.env.example ../.env
+
+# Edit the .env file with your API keys
+# Required:
+SILICONFLOW_API_KEY=your_siliconflow_api_key
+GITHUB_TOKEN=your_github_personal_access_token
+
+# Optional:
+CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id
+CLOUDFLARE_API_TOKEN=your_cloudflare_api_token
+```
+
+### 3. Start the System
+
+**Option A: Using the startup script (Recommended)**
+```bash
+# From project root
+./start-all.sh
+```
+
+**Option B: Manual startup**
+```bash
+# Terminal 1: Start backend server
+cd backend
+node real-server.cjs
+
+# Terminal 2: Start frontend server (new terminal)
+cd ..
+python3 -m http.server 8080
+```
+
+## Access the Application
+
+Once both servers are running:
+
+- **Main OCR Interface**: http://localhost:8080/handwriting-archive.html
+- **Admin Dashboard**: http://localhost:8080/admin-dashboard.html
+
+## First Steps
+
+1. **Test the System**: Visit the OCR interface and upload a sample handwritten image
+2. **Configure GitHub**: Use the admin dashboard to set up your repository settings
+3. **Process Images**: Upload handwritten notes and review the OCR results
+4. **Save to GitHub**: Commit processed notes to your repository
+
+## Troubleshooting
+
+### Common Issues
+
+**Port Already in Use**
+```bash
+# Kill process using port 8788
+lsof -ti:8788 | xargs kill -9
+
+# Kill process using port 8080
+lsof -ti:8080 | xargs kill -9
+```
+
+**API Key Issues**
+- Verify your API keys are correctly set in `.env`
+- Check that your GitHub token has `repo` permissions
+- Ensure SiliconFlow API key is active
+
+**Server Won't Start**
+- Check Node.js version: `node --version` (should be 18+)
+- Verify all dependencies are installed: `npm install`
+- Check the console for error messages
+
+## Next Steps
+
+- Read the [User Guide](USER_GUIDE.md) for detailed usage instructions
+- Check [API Usage](API_USAGE.md) for integration options
+- Review [Configuration Guide](../CONFIGURATION_GUIDE.md) for advanced settings
+
+## Need Help?
+
+- 📚 Check the [documentation](./)
+- 🐛 Report issues on [GitHub Issues](https://github.com/yourusername/handwriting-ocr-archive/issues)
+- 💬 Join discussions on [GitHub Discussions](https://github.com/yourusername/handwriting-ocr-archive/discussions)
 
 ## 🚀 5分钟快速上手
 
