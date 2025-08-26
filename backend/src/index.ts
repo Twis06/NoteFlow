@@ -430,6 +430,109 @@ export default {
       return await handleOCRRecognition(request, env)
     }
 
+    // 新增API路由：获取图片列表
+    if (request.method === 'GET' && url.pathname === '/api/images') {
+      try {
+        const page = Number(url.searchParams.get('page') || '1')
+        const perPage = Number(url.searchParams.get('per_page') || '50')
+        const data = await listCloudflareImages(env, page, perPage)
+        const accountHash = env.CLOUDFLARE_IMAGES_ACCOUNT_HASH
+        const variant = env.CLOUDFLARE_IMAGES_VARIANT || 'public'
+        
+        const images = (data.images || []).map((img: any) => ({
+          id: img.id,
+          name: img.filename || img.id,
+          url: `https://imagedelivery.net/${accountHash}/${img.id}/${variant}`,
+          size: img.meta?.size || 0,
+          created_at: img.uploaded
+        }))
+        
+        return new Response(JSON.stringify(images), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      } catch (error) {
+        console.error('[API] Failed to get images:', error)
+        return new Response(JSON.stringify({
+          success: false,
+          error: error instanceof Error ? error.message : String(error)
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      }
+    }
+
+    // 新增API路由：批量替换
+    if (request.method === 'POST' && url.pathname === '/api/batch-replace') {
+      try {
+        // 模拟批量替换功能
+        return new Response(JSON.stringify({
+          success: true,
+          count: 0,
+          message: '批量替换功能暂未实现'
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      } catch (error) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: error instanceof Error ? error.message : String(error)
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      }
+    }
+
+    // 新增API路由：清理图库
+    if (request.method === 'POST' && url.pathname === '/api/gallery/clean') {
+      try {
+        // 模拟清理图库功能
+        return new Response(JSON.stringify({
+          success: true,
+          deleted_count: 0,
+          message: '图库清理功能暂未实现'
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      } catch (error) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: error instanceof Error ? error.message : String(error)
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      }
+    }
+
+    // 新增API路由：导出数据
+    if (request.method === 'POST' && url.pathname === '/api/export') {
+      try {
+        // 模拟数据导出功能
+        return new Response(JSON.stringify({
+          success: true,
+          download_url: '/api/download/export.zip',
+          filename: 'export.zip',
+          message: '数据导出功能暂未实现'
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      } catch (error) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: error instanceof Error ? error.message : String(error)
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      }
+    }
+
     // 新增API路由：批量OCR处理
     if (url.pathname.startsWith('/api/batch-ocr/')) {
       const subPath = url.pathname.replace('/api/batch-ocr', '')

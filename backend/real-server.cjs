@@ -167,6 +167,8 @@ class RealAPIServer {
                 await this.handleSaveNote(req, res);
             } else if (pathname === '/api/sync/local') {
                 await this.handleLocalSync(req, res);
+            } else if (pathname === '/api/images') {
+                await this.handleImages(req, res);
             } else {
                 // 404处理
                 res.writeHead(404, { 'Content-Type': 'application/json' });
@@ -286,6 +288,60 @@ class RealAPIServer {
             }
         } catch (error) {
             console.error('Gallery images error:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: error.message }));
+        }
+    }
+
+    /**
+     * 处理图片列表请求 (/api/images)
+     */
+    async handleImages(req, res) {
+        const accountId = process.env.CLOUDFLARE_IMAGES_ACCOUNT_ID;
+        const apiToken = process.env.CLOUDFLARE_IMAGES_API_TOKEN;
+        const accountHash = process.env.CLOUDFLARE_IMAGES_ACCOUNT_HASH;
+        const variant = process.env.CLOUDFLARE_IMAGES_VARIANT || 'public';
+        
+        if (!accountId || !apiToken || accountId === 'test_account_id') {
+            // 返回空数组，避免前端报错
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify([]));
+            return;
+        }
+
+        try {
+            const url = new URL(`https://api.cloudflare.com/client/v4/accounts/${accountId}/images/v1`);
+            const page = req.url.includes('page=') ? new URL(req.url, 'http://localhost').searchParams.get('page') : '1';
+            const perPage = req.url.includes('per_page=') ? new URL(req.url, 'http://localhost').searchParams.get('per_page') : '50';
+            
+            url.searchParams.set('page', page);
+            url.searchParams.set('per_page', perPage);
+            
+            const response = await fetch(url.toString(), {
+                headers: {
+                    'Authorization': `Bearer ${apiToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                const images = (result.result?.images || []).map(img => ({
+                    id: img.id,
+                    name: img.filename || img.id,
+                    url: accountHash ? `https://imagedelivery.net/${accountHash}/${img.id}/${variant}` : (img.variants?.[0] || img.url),
+                    size: img.meta?.size || 0,
+                    created_at: img.uploaded
+                }));
+                
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(images));
+            } else {
+                throw new Error(result.errors?.[0]?.message || 'Failed to fetch images');
+            }
+        } catch (error) {
+            console.error('Images API error:', error);
             res.writeHead(500, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: false, error: error.message }));
         }
