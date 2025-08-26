@@ -1166,7 +1166,7 @@
                         </div>
                         <div class="upload-text">拖拽图片到此处或点击上传</div>
                         <div class="upload-hint">支持 JPG、PNG、GIF 格式，可批量处理</div>
-                        <input type="file" id="fileInput" multiple accept="image/*" onchange="handleFileSelect(event)" style="display: none;">
+                        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
                         <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()" style="margin-top: 16px;">
                             <i class="fas fa-plus"></i> 选择图片
                         </button>
@@ -1522,8 +1522,10 @@
         function handleDrop(e) {
             e.preventDefault();
             e.currentTarget.classList.remove('dragover');
-            const files = Array.from(e.dataTransfer.files);
-            handleFiles(files);
+            const files = Array.from(e.dataTransfer.files).filter(file => 
+                file.type.startsWith('image/')
+            );
+            addFilesToList(files);
         }
 
         // OCR功能实现 - 基于原有handwriting-archive.html的逻辑
