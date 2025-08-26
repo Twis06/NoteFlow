@@ -351,6 +351,74 @@ class RealAPIServer {
     }
 
     /**
+     * 处理单个图片操作 (DELETE /api/gallery/images/{imageId})
+     */
+    async handleSingleImage(req, res) {
+        const url = new URL(req.url, 'http://localhost');
+        const pathParts = url.pathname.split('/');
+        const imageId = pathParts[pathParts.length - 1];
+        
+        if (req.method === 'DELETE') {
+            await this.deleteCloudflareImage(imageId, res);
+        } else {
+            res.writeHead(405, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: 'Method not allowed' }));
+        }
+    }
+
+    /**
+     * 删除Cloudflare Images中的图片
+     */
+    async deleteCloudflareImage(imageId, res) {
+        const accountId = process.env.CLOUDFLARE_IMAGES_ACCOUNT_ID;
+        const apiToken = process.env.CLOUDFLARE_IMAGES_API_TOKEN;
+        
+        if (!accountId || !apiToken || accountId === 'test_account_id') {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+                success: false, 
+                error: 'Cloudflare Images API未配置',
+                needsConfig: true 
+            }));
+            return;
+        }
+
+        try {
+            console.log(`Deleting image: ${imageId}`);
+            
+            const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/images/v1/${imageId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${apiToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                console.log(`Image ${imageId} deleted successfully`);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ 
+                    success: true, 
+                    message: '图片删除成功',
+                    imageId: imageId 
+                }));
+            } else {
+                console.error('Cloudflare delete error:', result.errors);
+                throw new Error(result.errors?.[0]?.message || 'Failed to delete image');
+            }
+        } catch (error) {
+            console.error('Delete image error:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+                success: false, 
+                error: error.message || '图片删除失败' 
+            }));
+        }
+    }
+
+    /**
      * 处理GitHub仓库信息请求
      */
     async handleGitHubRepoInfo(req, res) {
