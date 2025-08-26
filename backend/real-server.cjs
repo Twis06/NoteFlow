@@ -145,6 +145,9 @@ class RealAPIServer {
                 await this.handleSyncStatus(req, res);
             } else if (pathname === '/api/gallery/images') {
                 await this.handleGalleryImages(req, res);
+            } else if (pathname.match(/^\/api\/gallery\/images\/[^/]+$/)) {
+                // Handle single image operations (DELETE /api/gallery/images/{imageId})
+                await this.handleSingleImage(req, res);
             } else if (pathname === '/api/github/repo-info') {
                 await this.handleGitHubRepoInfo(req, res);
             } else if (pathname === '/api/notes/updates') {
