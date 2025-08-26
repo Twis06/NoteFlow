@@ -1,19 +1,27 @@
-# Handwriting OCR Archive System
+# NoteFlow  
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0%2B-blue.svg)](https://www.typescriptlang.org/)
+[English](README.md) | [中文文档](README.zh-CN.md)  
 
-A powerful web-based system for OCR processing of handwritten notes with automatic GitHub integration and intelligent document management.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)  
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)  
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0%2B-blue.svg)](https://www.typescriptlang.org/)  
 
-## Features
+![mac](imgs/mac.png)
+**NoteFlow** is a **secure, web-based note synchronization & OCR system**.  
+It syncs your Markdown notes directly to **GitHub** or **your own server**, supports **batch OCR of handwritten notes (with math recognition)**, and auto-converts everything into well-structured Markdown.  
 
-- **Advanced OCR Processing**: Powered by GLM-4.5V for accurate handwriting recognition
-- **Batch Processing**: Upload and process multiple images simultaneously
-- **GitHub Integration**: Automatic saving and version control
-- **Smart Formatting**: Auto-converts OCR results to structured Markdown
-- **Web Interface**: Modern, responsive user interface
-- **Real-time Processing**: Live preview and editing capabilities
+---
+
+## ✨ Features  
+
+-  **Own Your Data** — Sync to GitHub or your own server, no third-party lock-in.  
+-  **Universal Markdown Support** — Works with Obsidian, Typora, Logseq, or any Markdown-based platform.  
+-  **Handwriting → Markdown** — OCR powered by GLM-4.5V, with math formula recognition.  
+-  **Batch Processing** — Upload multiple handwritten notes or images at once.  
+-  **Image Hosting Integration** — Replace local image files with external links for shareability.  
+-  **Real-time Preview & Editing** — Modern UI with live Markdown rendering.  
+-  **Smart GitHub Integration** — Auto-commit, version control, conflict resolution.  
+
 
 ## Quick Start
 
@@ -121,6 +129,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Support
 
 - [Documentation](docs/)
-- [Issue Tracker](https://github.com/yourusername/handwriting-ocr-archive/issues)
-- [Discussions](https://github.com/yourusername/handwriting-ocr-archive/discussions)
+- [Issue Tracker](https://github.com/twis06/NoteFlow/issues)
+- [Discussions](https://github.com/twis06/NoteFlow/discussions)
 - Repository settings for automatic saving
